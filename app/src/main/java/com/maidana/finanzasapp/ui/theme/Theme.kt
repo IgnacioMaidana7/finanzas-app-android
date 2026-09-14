@@ -12,32 +12,47 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = EmeraldPrimaryDark,
+    onPrimary = EmeraldOnPrimaryDark,
+    primaryContainer = EmeraldPrimaryContainerDark,
+    onPrimaryContainer = EmeraldOnPrimaryContainerDark,
+    secondary = SlateSecondaryDark,
+    onSecondary = SlateOnSecondaryDark,
+    secondaryContainer = SlateSecondaryContainerDark,
+    onSecondaryContainer = SlateOnSecondaryContainerDark,
+    background = SurfaceDark,
+    onBackground = OnSurfaceDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    outline = OutlineDark,
+    error = ExpenseRedDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = EmeraldPrimaryLight,
+    onPrimary = EmeraldOnPrimaryLight,
+    primaryContainer = EmeraldPrimaryContainerLight,
+    onPrimaryContainer = EmeraldOnPrimaryContainerLight,
+    secondary = SlateSecondaryLight,
+    onSecondary = SlateOnSecondaryLight,
+    secondaryContainer = SlateSecondaryContainerLight,
+    onSecondaryContainer = SlateOnSecondaryContainerLight,
+    background = SurfaceLight,
+    onBackground = OnSurfaceLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
+    outline = OutlineLight,
+    error = ExpenseRed
 )
 
 @Composable
 fun FinanzasAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Desactivado para mantener identidad visual financiera
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
