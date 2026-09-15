@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +33,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +47,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.maidana.finanzasapp.ui.theme.ExpenseRed
+import com.maidana.finanzasapp.ui.theme.ExpenseRedContainer
 
 @Composable
 fun RegisterScreen(
@@ -50,11 +57,22 @@ fun RegisterScreen(
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    val isLoading = uiState.authState is AuthState.Loading
+
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    // Reaccionar ante registro y autenticación exitosa
+    LaunchedEffect(uiState.authState) {
+        if (uiState.authState is AuthState.Authenticated) {
+            onNavigateToDashboard()
+            viewModel.resetAuthState()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -81,7 +99,38 @@ fun RegisterScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Tarjeta de Error
+        if (uiState.authState is AuthState.Error) {
+            val errorMessage = (uiState.authState as AuthState.Error).message
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = ExpenseRedContainer)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ErrorOutline,
+                        contentDescription = null,
+                        tint = ExpenseRed,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ExpenseRed,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -95,24 +144,32 @@ fun RegisterScreen(
             ) {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        viewModel.clearError()
+                    },
                     label = { Text("Nombre completo") },
                     leadingIcon = {
                         Icon(Icons.Default.Person, contentDescription = null)
                     },
                     singleLine = true,
+                    enabled = !isLoading,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        viewModel.clearError()
+                    },
                     label = { Text("Correo electrónico") },
                     leadingIcon = {
                         Icon(Icons.Default.Email, contentDescription = null)
                     },
                     singleLine = true,
+                    enabled = !isLoading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -120,8 +177,11 @@ fun RegisterScreen(
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    onValueChange = {
+                        password = it
+                        viewModel.clearError()
+                    },
+                    label = { Text("Contraseña (mínimo 8 caracteres)") },
                     leadingIcon = {
                         Icon(Icons.Default.Lock, contentDescription = null)
                     },
@@ -135,6 +195,7 @@ fun RegisterScreen(
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
+                    enabled = !isLoading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -142,13 +203,17 @@ fun RegisterScreen(
 
                 OutlinedTextField(
                     value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
+                    onValueChange = {
+                        confirmPassword = it
+                        viewModel.clearError()
+                    },
                     label = { Text("Confirmar contraseña") },
                     leadingIcon = {
                         Icon(Icons.Default.Lock, contentDescription = null)
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
+                    enabled = !isLoading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -157,17 +222,33 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
-                    onClick = onNavigateToDashboard,
+                    onClick = {
+                        viewModel.register(
+                            name = name,
+                            email = email,
+                            password = password,
+                            confirmPassword = confirmPassword
+                        )
+                    },
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = "Crear Cuenta",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.5.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Crear Cuenta",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
@@ -182,7 +263,13 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            TextButton(onClick = onNavigateToLogin) {
+            TextButton(
+                onClick = {
+                    viewModel.clearError()
+                    onNavigateToLogin()
+                },
+                enabled = !isLoading
+            ) {
                 Text(
                     text = "Iniciar Sesión",
                     style = MaterialTheme.typography.bodyMedium,

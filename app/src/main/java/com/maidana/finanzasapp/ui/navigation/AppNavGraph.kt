@@ -24,23 +24,33 @@ import com.maidana.finanzasapp.ui.screens.transactions.TransactionsScreen
 import com.maidana.finanzasapp.ui.screens.transactions.TransactionsViewModel
 
 
+import com.maidana.finanzasapp.ui.screens.auth.AuthViewModel
+
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel = viewModel()
 ) {
     val transactionsViewModel: TransactionsViewModel = viewModel()
     val budgetsViewModel: BudgetsViewModel = viewModel()
     val goalsViewModel: GoalsViewModel = viewModel()
 
+    val startDestination = if (authViewModel.isUserAuthenticated()) {
+        Screen.Dashboard.route
+    } else {
+        Screen.Login.route
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route,
+        startDestination = startDestination,
         modifier = modifier
     ) {
         // --- Módulo Autenticación ---
         composable(route = Screen.Login.route) {
             LoginScreen(
+                viewModel = authViewModel,
                 onNavigateToDashboard = {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
@@ -54,6 +64,7 @@ fun AppNavGraph(
 
         composable(route = Screen.Register.route) {
             RegisterScreen(
+                viewModel = authViewModel,
                 onNavigateToDashboard = {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
@@ -78,6 +89,7 @@ fun AppNavGraph(
                     navController.navigate(Screen.Goals.route)
                 },
                 onLogout = {
+                    authViewModel.logout()
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }

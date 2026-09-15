@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,12 +21,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +36,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +52,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.maidana.finanzasapp.ui.theme.ExpenseRed
+import com.maidana.finanzasapp.ui.theme.ExpenseRedContainer
 
 @Composable
 fun LoginScreen(
@@ -55,9 +62,20 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = viewModel()
 ) {
-    var email by remember { mutableStateOf("ignacio@finanzasapp.com") }
-    var password by remember { mutableStateOf("123456") }
+    val uiState by viewModel.uiState.collectAsState()
+    val isLoading = uiState.authState is AuthState.Loading
+
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    // Reaccionar ante autenticación exitosa
+    LaunchedEffect(uiState.authState) {
+        if (uiState.authState is AuthState.Authenticated) {
+            onNavigateToDashboard()
+            viewModel.resetAuthState()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -103,7 +121,38 @@ fun LoginScreen(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Tarjeta de Error si corresponde
+        if (uiState.authState is AuthState.Error) {
+            val errorMessage = (uiState.authState as AuthState.Error).message
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = ExpenseRedContainer)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ErrorOutline,
+                        contentDescription = null,
+                        tint = ExpenseRed,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ExpenseRed,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -116,19 +165,23 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Bienvenido de nuevo",
+                    text = "Iniciar Sesión",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        viewModel.clearError()
+                    },
                     label = { Text("Correo electrónico") },
                     leadingIcon = {
                         Icon(Icons.Default.Email, contentDescription = null)
                     },
                     singleLine = true,
+                    enabled = !isLoading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -136,7 +189,10 @@ fun LoginScreen(
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        viewModel.clearError()
+                    },
                     label = { Text("Contraseña") },
                     leadingIcon = {
                         Icon(Icons.Default.Lock, contentDescription = null)
@@ -151,6 +207,7 @@ fun LoginScreen(
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
+                    enabled = !isLoading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -159,17 +216,26 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
-                    onClick = onNavigateToDashboard,
+                    onClick = { viewModel.login(email, password) },
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = "Iniciar Sesión",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.5.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Iniciar Sesión",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
@@ -184,7 +250,13 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            TextButton(onClick = onNavigateToRegister) {
+            TextButton(
+                onClick = {
+                    viewModel.clearError()
+                    onNavigateToRegister()
+                },
+                enabled = !isLoading
+            ) {
                 Text(
                     text = "Regístrate aquí",
                     style = MaterialTheme.typography.bodyMedium,
