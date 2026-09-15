@@ -22,9 +22,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +60,10 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
 
     Column(
         modifier = modifier
@@ -132,7 +138,7 @@ fun DashboardScreen(
                 value = CurrencyUtils.format(uiState.monthlySavings),
                 icon = Icons.Default.Savings,
                 iconColor = MaterialTheme.colorScheme.primary,
-                subtitle = "Tasa de ahorro 59%",
+                subtitle = uiState.savingsRateText,
                 modifier = Modifier.weight(1f)
             )
 
@@ -141,7 +147,7 @@ fun DashboardScreen(
                 value = CurrencyUtils.format(uiState.monthlyExpense),
                 icon = Icons.Default.ArrowDownward,
                 iconColor = ExpenseRed,
-                subtitle = "41% del ingreso",
+                subtitle = uiState.expenseRateText,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -159,7 +165,7 @@ fun DashboardScreen(
             Text("Registrar Nuevo Movimiento", fontWeight = FontWeight.SemiBold)
         }
 
-        // Resumen de Presupuestos
+        // Resumen de Presupuestos (Mock)
         if (uiState.budgets.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
@@ -174,7 +180,7 @@ fun DashboardScreen(
             }
         }
 
-        // Resumen de Objetivos de Ahorro
+        // Resumen de Objetivos de Ahorro (Mock)
         if (uiState.featuredGoal != null) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
@@ -199,7 +205,7 @@ fun DashboardScreen(
             }
         }
 
-        // Últimos Movimientos
+        // Últimos Movimientos (Reales desde Firestore)
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,8 +222,89 @@ fun DashboardScreen(
                 }
             }
 
-            uiState.recentTransactions.forEach { tx ->
-                TransactionRow(transaction = tx)
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.5.dp
+                        )
+                    }
+                }
+
+                uiState.isError -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = uiState.errorMessage ?: "No se pudieron cargar los movimientos.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(onClick = { viewModel.loadData() }) {
+                                Text("Reintentar")
+                            }
+                        }
+                    }
+                }
+
+                uiState.recentTransactions.isEmpty() -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "Sin movimientos registrados aún",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Tus transacciones aparecerán aquí a medida que las registres.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                else -> {
+                    uiState.recentTransactions.forEach { tx ->
+                        TransactionRow(
+                            transaction = tx,
+                            onClick = onNavigateToTransactions
+                        )
+                    }
+                }
             }
         }
 

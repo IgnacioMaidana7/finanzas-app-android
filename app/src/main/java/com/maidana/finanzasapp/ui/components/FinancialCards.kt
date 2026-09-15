@@ -41,9 +41,9 @@ import com.maidana.finanzasapp.ui.theme.IncomeGreen
 
 @Composable
 fun BalanceCard(
-    totalBalance: Double,
-    monthlyIncome: Double,
-    monthlyExpense: Double,
+    totalBalance: Long,
+    monthlyIncome: Long,
+    monthlyExpense: Long,
     modifier: Modifier = Modifier
 ) {
     var isVisible by remember { mutableStateOf(true) }
