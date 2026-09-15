@@ -181,38 +181,38 @@ object MockDataProvider {
     val goals: List<SavingsGoal> = listOf(
         SavingsGoal(
             id = "meta-emergencia",
-            title = "Fondo de Emergencia",
-            targetAmount = 1000000.0,
-            currentAmount = 650000.0,
+            name = "Fondo de Emergencia",
+            targetAmount = 1000000L,
+            savedAmount = 650000L,
             targetDateString = "Diciembre 2026",
             contributions = listOf(
-                GoalContribution("c1", "meta-emergencia", 250000.0, "01/07/2026", "Aporte inicial"),
-                GoalContribution("c2", "meta-emergencia", 200000.0, "05/08/2026", "Sobrante julio"),
-                GoalContribution("c3", "meta-emergencia", 200000.0, "04/09/2026", "Aporte mensual")
+                GoalContribution("c1", "meta-emergencia", 250000L, 1719800000000L, "01/07/2026", "Aporte inicial"),
+                GoalContribution("c2", "meta-emergencia", 200000L, 1722800000000L, "05/08/2026", "Sobrante julio"),
+                GoalContribution("c3", "meta-emergencia", 200000L, 1725400000000L, "04/09/2026", "Aporte mensual")
             )
         ),
         SavingsGoal(
             id = "meta-vacaciones",
-            title = "Vacaciones en Brasil",
-            targetAmount = 800000.0,
-            currentAmount = 480000.0,
+            name = "Vacaciones en Brasil",
+            targetAmount = 800000L,
+            savedAmount = 480000L,
             targetDateString = "Febrero 2027",
             contributions = listOf(
-                GoalContribution("c4", "meta-vacaciones", 180000.0, "15/07/2026", "Reserva de vuelo"),
-                GoalContribution("c5", "meta-vacaciones", 150000.0, "12/08/2026", "Aporte aguinaldo"),
-                GoalContribution("c6", "meta-vacaciones", 150000.0, "10/09/2026", "Ahorro septiembre")
+                GoalContribution("c4", "meta-vacaciones", 180000L, 1721000000000L, "15/07/2026", "Reserva de vuelo"),
+                GoalContribution("c5", "meta-vacaciones", 150000L, 1723400000000L, "12/08/2026", "Aporte aguinaldo"),
+                GoalContribution("c6", "meta-vacaciones", 150000L, 1725900000000L, "10/09/2026", "Ahorro septiembre")
             )
         ),
         SavingsGoal(
             id = "meta-auto",
-            title = "Cambio de Vehículo",
-            targetAmount = 3500000.0,
-            currentAmount = 1400000.0,
+            name = "Cambio de Vehículo",
+            targetAmount = 3500000L,
+            savedAmount = 1400000L,
             targetDateString = "Noviembre 2027",
             contributions = listOf(
-                GoalContribution("c7", "meta-auto", 800000.0, "10/06/2026", "Entrega base"),
-                GoalContribution("c8", "meta-auto", 300000.0, "15/07/2026", "Aporte extraordinario"),
-                GoalContribution("c9", "meta-auto", 300000.0, "20/08/2026", "Aporte mensual")
+                GoalContribution("c7", "meta-auto", 800000L, 1718000000000L, "10/06/2026", "Entrega base"),
+                GoalContribution("c8", "meta-auto", 300000L, 1721000000000L, "15/07/2026", "Aporte extraordinario"),
+                GoalContribution("c9", "meta-auto", 300000L, 1724100000000L, "20/08/2026", "Aporte mensual")
             )
         )
     )

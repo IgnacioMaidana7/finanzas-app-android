@@ -37,10 +37,7 @@ fun SavingsGoalCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val progress = if (goal.targetAmount > 0) {
-        (goal.currentAmount / goal.targetAmount).toFloat()
-    } else 0f
-
+    val progress = goal.progress
     val percentage = (progress * 100).toInt()
 
     Card(

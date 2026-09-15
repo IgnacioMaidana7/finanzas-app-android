@@ -11,6 +11,8 @@ import com.maidana.finanzasapp.data.repository.AuthRepository
 import com.maidana.finanzasapp.data.repository.BudgetRepository
 import com.maidana.finanzasapp.data.repository.FirebaseAuthRepository
 import com.maidana.finanzasapp.data.repository.FirestoreBudgetRepository
+import com.maidana.finanzasapp.data.repository.GoalRepository
+import com.maidana.finanzasapp.data.repository.FirestoreGoalRepository
 import com.maidana.finanzasapp.data.repository.FirestoreTransactionRepository
 import com.maidana.finanzasapp.data.repository.TransactionRepository
 import com.maidana.finanzasapp.ui.screens.budgets.BudgetsViewModel
@@ -45,8 +47,8 @@ data class DashboardUiState(
     val errorMessage: String? = null,
     // Presupuestos reales calculados para el mes actual:
     val budgets: List<Budget> = emptyList(),
-    // Mocks que continúan usándose:
-    val featuredGoal: SavingsGoal? = MockDataProvider.goals.firstOrNull()
+    // Objetivo de ahorro destacado real desde Firestore:
+    val featuredGoal: SavingsGoal? = null
 ) {
     val isLoading: Boolean get() = status is DashboardStatus.Loading
     val isSuccess: Boolean get() = status is DashboardStatus.Success
@@ -58,6 +60,7 @@ class DashboardViewModel(
     private val authRepository: AuthRepository = FirebaseAuthRepository(),
     private val transactionRepository: TransactionRepository = FirestoreTransactionRepository(),
     private val budgetRepository: BudgetRepository = FirestoreBudgetRepository(),
+    private val goalRepository: GoalRepository = FirestoreGoalRepository(),
     private val currentTimeProvider: () -> Long = { System.currentTimeMillis() }
 ) : ViewModel() {
 
@@ -93,8 +96,9 @@ class DashboardViewModel(
         loadDataJob = viewModelScope.launch {
             combine(
                 transactionRepository.getTransactions(),
-                budgetRepository.getBudgets()
-            ) { transactions, rawBudgets ->
+                budgetRepository.getBudgets(),
+                goalRepository.getGoals()
+            ) { transactions, rawBudgets, goals ->
                 val now = currentTimeProvider()
                 val nowCal = Calendar.getInstance().apply { timeInMillis = now }
                 val currentMonth = nowCal.get(Calendar.MONTH) + 1
@@ -156,6 +160,13 @@ class DashboardViewModel(
                 // 4. Últimos 4 movimientos reales ordenados por fecha descendente
                 val recent = transactions.sortedByDescending { it.date }.take(4)
 
+                // 5. Meta destacada determinística desde Firestore:
+                // Incompleta con fecha límite más próxima; si no tienen fecha o todas cumplidas, la última creada; o null
+                val featuredGoal = goals
+                    .filter { !it.isCompleted }
+                    .minByOrNull { if (it.targetDate > 0L) it.targetDate else it.createdAt }
+                    ?: goals.maxByOrNull { it.createdAt }
+
                 _uiState.update {
                     it.copy(
                         status = newStatus,
@@ -167,6 +178,7 @@ class DashboardViewModel(
                         expenseRateText = expenseRateText,
                         recentTransactions = recent,
                         budgets = currentMonthBudgets,
+                        featuredGoal = featuredGoal,
                         errorMessage = null
                     )
                 }

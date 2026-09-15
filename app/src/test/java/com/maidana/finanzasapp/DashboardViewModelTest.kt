@@ -26,6 +26,7 @@ class DashboardViewModelTest {
     private lateinit var fakeAuthRepository: FakeAuthRepository
     private lateinit var fakeTransactionRepository: FakeTransactionRepository
     private lateinit var fakeBudgetRepository: FakeBudgetRepository
+    private lateinit var fakeGoalRepository: FakeGoalRepository
     private lateinit var viewModel: DashboardViewModel
 
     // Fecha fija de prueba: 15 de Septiembre de 2026
@@ -41,10 +42,12 @@ class DashboardViewModelTest {
         }
         fakeTransactionRepository = FakeTransactionRepository()
         fakeBudgetRepository = FakeBudgetRepository(MockDataProvider.budgets)
+        fakeGoalRepository = FakeGoalRepository(MockDataProvider.goals)
         viewModel = DashboardViewModel(
             authRepository = fakeAuthRepository,
             transactionRepository = fakeTransactionRepository,
             budgetRepository = fakeBudgetRepository,
+            goalRepository = fakeGoalRepository,
             currentTimeProvider = { fixedNow }
         )
     }
@@ -63,7 +66,6 @@ class DashboardViewModelTest {
         assertEquals(0L, state.monthlyExpense)
         assertEquals(0L, state.monthlySavings)
         assertTrue(state.recentTransactions.isEmpty())
-        // Verifica que presupuestos y objetivos mock continúen disponibles
         assertTrue(state.budgets.isNotEmpty())
         assertNotNull(state.featuredGoal)
     }
@@ -206,5 +208,32 @@ class DashboardViewModelTest {
         assertTrue(DashboardViewModel.isSameMonthAndYear(sept30, fixedNow))
         org.junit.Assert.assertFalse(DashboardViewModel.isSameMonthAndYear(ago31, fixedNow))
         org.junit.Assert.assertFalse(DashboardViewModel.isSameMonthAndYear(sept2025, fixedNow))
+    }
+
+    @Test
+    fun featuredGoal_selection_prioritizesIncompleteGoalWithEarliestDeadline() {
+        val gCompleted = com.maidana.finanzasapp.data.model.SavingsGoal(
+            id = "c1", name = "Meta Cumplida", targetAmount = 100000L, savedAmount = 100000L, targetDate = 1000L, createdAt = 1000L
+        )
+        val gIncompleteLater = com.maidana.finanzasapp.data.model.SavingsGoal(
+            id = "i1", name = "Incompleta Tardia", targetAmount = 200000L, savedAmount = 50000L, targetDate = 5000L, createdAt = 2000L
+        )
+        val gIncompleteEarlier = com.maidana.finanzasapp.data.model.SavingsGoal(
+            id = "i2", name = "Incompleta Temprana", targetAmount = 200000L, savedAmount = 50000L, targetDate = 2000L, createdAt = 3000L
+        )
+
+        fakeGoalRepository.emitGoals(listOf(gCompleted, gIncompleteLater, gIncompleteEarlier))
+
+        val state = viewModel.uiState.value
+        assertNotNull(state.featuredGoal)
+        assertEquals("i2", state.featuredGoal!!.id)
+    }
+
+    @Test
+    fun featuredGoal_whenGoalsEmpty_isNull() {
+        fakeGoalRepository.emitGoals(emptyList())
+
+        val state = viewModel.uiState.value
+        org.junit.Assert.assertNull(state.featuredGoal)
     }
 }
