@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,34 +25,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.maidana.finanzasapp.data.model.Budget
+import com.maidana.finanzasapp.data.model.BudgetStatus
 import com.maidana.finanzasapp.ui.theme.ExpenseRed
 import com.maidana.finanzasapp.ui.theme.IncomeGreen
 import com.maidana.finanzasapp.ui.theme.WarningAmber
 
-enum class BudgetStatus {
-    NORMAL,
-    NEAR_LIMIT,
-    EXCEEDED
-}
-
 @Composable
 fun BudgetCard(
     budget: Budget,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDeleteClick: (() -> Unit)? = null
 ) {
-    val percentage = if (budget.limitAmount > 0) {
-        (budget.spentAmount / budget.limitAmount).toFloat()
-    } else 0f
-
-    val status = when {
-        percentage > 1.0f -> BudgetStatus.EXCEEDED
-        percentage >= 0.75f -> BudgetStatus.NEAR_LIMIT
-        else -> BudgetStatus.NORMAL
-    }
+    val percentage = budget.percentage
+    val status = budget.status
 
     val statusColor = when (status) {
         BudgetStatus.NORMAL -> IncomeGreen
@@ -64,7 +55,7 @@ fun BudgetCard(
     }
 
     val iconInfo = getCategoryIcon(budget.category)
-    val remaining = budget.limitAmount - budget.spentAmount
+    val remaining = budget.remainingAmount
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -83,6 +74,7 @@ fun BudgetCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
+                    modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -116,12 +108,31 @@ fun BudgetCard(
                     }
                 }
 
-                Text(
-                    text = "${(percentage * 100).toInt()}%",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = statusColor
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "${(percentage * 100).toInt()}%",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = statusColor
+                    )
+
+                    if (onDeleteClick != null) {
+                        IconButton(
+                            onClick = onDeleteClick,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = "Eliminar presupuesto",
+                                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.75f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -172,7 +183,7 @@ fun BudgetCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = if (remaining >= 0) "Disponible" else "Excedente",
+                        text = if (remaining >= 0L) "Disponible" else "Excedente",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -180,7 +191,7 @@ fun BudgetCard(
                         text = CurrencyUtils.format(kotlin.math.abs(remaining)),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (remaining >= 0) IncomeGreen else ExpenseRed
+                        color = if (remaining >= 0L) IncomeGreen else ExpenseRed
                     )
                 }
             }

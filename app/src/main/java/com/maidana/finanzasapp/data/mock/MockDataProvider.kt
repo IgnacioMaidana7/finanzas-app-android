@@ -134,37 +134,47 @@ object MockDataProvider {
         Budget(
             id = "bg_01",
             category = "Alimentación",
-            limitAmount = 150000.0,
-            spentAmount = 98500.0,
-            month = "Septiembre 2026"
+            limitAmount = 150000L,
+            spentAmount = 98500L,
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
         ),
         Budget(
             id = "bg_02",
             category = "Vivienda y Servicios",
-            limitAmount = 250000.0,
-            spentAmount = 238500.0, // 95.4% -> advertencia
-            month = "Septiembre 2026"
+            limitAmount = 250000L,
+            spentAmount = 238500L, // 95.4% -> advertencia
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
         ),
         Budget(
             id = "bg_03",
             category = "Salidas y Ocio",
-            limitAmount = 50000.0,
-            spentAmount = 58200.0, // 116.4% -> excedido
-            month = "Septiembre 2026"
+            limitAmount = 50000L,
+            spentAmount = 58200L, // 116.4% -> excedido
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
         ),
         Budget(
             id = "bg_04",
             category = "Transporte",
-            limitAmount = 60000.0,
-            spentAmount = 32000.0, // 53.3% -> normal
-            month = "Septiembre 2026"
+            limitAmount = 60000L,
+            spentAmount = 32000L, // 53.3% -> normal
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
         ),
         Budget(
             id = "bg_05",
             category = "Salud y Cuidado",
-            limitAmount = 40000.0,
-            spentAmount = 25400.0, // 63.5% -> normal
-            month = "Septiembre 2026"
+            limitAmount = 40000L,
+            spentAmount = 25400L, // 63.5% -> normal
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
         )
     )
 

@@ -4,7 +4,7 @@ import com.maidana.finanzasapp.data.model.Budget
 import kotlinx.coroutines.flow.Flow
 
 interface BudgetRepository {
-    fun getBudgets(month: String): Flow<List<Budget>>
+    fun getBudgets(): Flow<List<Budget>>
     suspend fun addBudget(budget: Budget): Result<Unit>
-    suspend fun updateBudget(budget: Budget): Result<Unit>
+    suspend fun deleteBudget(id: String): Result<Unit>
 }

@@ -1,5 +1,6 @@
 package com.maidana.finanzasapp
 
+import com.maidana.finanzasapp.data.mock.MockDataProvider
 import com.maidana.finanzasapp.data.model.Transaction
 import com.maidana.finanzasapp.data.model.TransactionType
 import com.maidana.finanzasapp.data.model.User
@@ -24,6 +25,7 @@ class DashboardViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeAuthRepository: FakeAuthRepository
     private lateinit var fakeTransactionRepository: FakeTransactionRepository
+    private lateinit var fakeBudgetRepository: FakeBudgetRepository
     private lateinit var viewModel: DashboardViewModel
 
     // Fecha fija de prueba: 15 de Septiembre de 2026
@@ -38,9 +40,11 @@ class DashboardViewModelTest {
             currentUserMock = User(id = "uid_123", email = "test@finanzasapp.com", displayName = "Ignacio")
         }
         fakeTransactionRepository = FakeTransactionRepository()
+        fakeBudgetRepository = FakeBudgetRepository(MockDataProvider.budgets)
         viewModel = DashboardViewModel(
             authRepository = fakeAuthRepository,
             transactionRepository = fakeTransactionRepository,
+            budgetRepository = fakeBudgetRepository,
             currentTimeProvider = { fixedNow }
         )
     }
