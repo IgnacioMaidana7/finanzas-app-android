@@ -35,7 +35,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,12 +66,21 @@ fun NewTransactionScreen(
     modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel = viewModel()
 ) {
+    val saveState by viewModel.saveState.collectAsState()
+
     var type by remember { mutableStateOf(TransactionType.GASTO) }
     var amountText by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Alimentación") }
     var dateString by remember {
         mutableStateOf(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()))
+    }
+
+    LaunchedEffect(saveState) {
+        if (saveState is SaveTransactionState.Success) {
+            viewModel.resetSaveState()
+            onNavigateBack()
+        }
     }
 
     val categories = if (type == TransactionType.GASTO) {
@@ -81,7 +93,10 @@ fun NewTransactionScreen(
         topBar = {
             AppTopBar(
                 title = "Nuevo Movimiento",
-                onBackClick = onNavigateBack
+                onBackClick = {
+                    viewModel.resetSaveState()
+                    onNavigateBack()
+                }
             )
         },
         modifier = modifier
@@ -96,6 +111,23 @@ fun NewTransactionScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            if (saveState is SaveTransactionState.Error) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = (saveState as SaveTransactionState.Error).message,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+            }
+
             // Selector Ingreso / Gasto
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -166,11 +198,11 @@ fun NewTransactionScreen(
                     OutlinedTextField(
                         value = amountText,
                         onValueChange = { input ->
-                            if (input.all { it.isDigit() || it == '.' || it == ',' }) {
+                            if (input.all { it.isDigit() }) {
                                 amountText = input
                             }
                         },
-                        placeholder = { Text("0.00", style = MaterialTheme.typography.headlineMedium) },
+                        placeholder = { Text("0", style = MaterialTheme.typography.headlineMedium) },
                         prefix = {
                             Text(
                                 text = "$ ",
@@ -181,7 +213,7 @@ fun NewTransactionScreen(
                         },
                         textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -271,19 +303,20 @@ fun NewTransactionScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val isLoading = saveState is SaveTransactionState.Loading
+
             // Botón Guardar
             Button(
                 onClick = {
-                    val amount = amountText.replace(",", ".").toDoubleOrNull() ?: 0.0
-                    val finalTitle = title.ifBlank { selectedCategory }
-                    viewModel.addTransaction(
-                        title = finalTitle,
-                        amount = amount,
+                    viewModel.saveTransaction(
+                        title = title,
+                        amountText = amountText,
                         type = type,
-                        category = selectedCategory
+                        category = selectedCategory,
+                        dateString = dateString
                     )
-                    onNavigateBack()
                 },
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -292,13 +325,27 @@ fun NewTransactionScreen(
                     containerColor = if (type == TransactionType.INGRESO) IncomeGreen else MaterialTheme.colorScheme.primary
                 )
             ) {
-                Icon(Icons.Default.Check, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Guardar Movimiento", fontWeight = FontWeight.Bold)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        color = Color.White,
+                        strokeWidth = 2.5.dp
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("Guardando movimiento...", fontWeight = FontWeight.Bold)
+                } else {
+                    Icon(Icons.Default.Check, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Guardar Movimiento", fontWeight = FontWeight.Bold)
+                }
             }
 
             OutlinedButton(
-                onClick = onNavigateBack,
+                onClick = {
+                    viewModel.resetSaveState()
+                    onNavigateBack()
+                },
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {

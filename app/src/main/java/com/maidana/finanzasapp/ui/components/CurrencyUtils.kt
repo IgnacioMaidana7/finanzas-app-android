@@ -9,12 +9,25 @@ object CurrencyUtils {
         maximumFractionDigits = 0
     }
 
+    fun format(amount: Long): String {
+        return try {
+            format.format(amount)
+        } catch (_: Exception) {
+            "$ ${"%,d".format(amount)}"
+        }
+    }
+
     fun format(amount: Double): String {
         return try {
             format.format(amount)
         } catch (_: Exception) {
             "$ ${"%,.0f".format(amount)}"
         }
+    }
+
+    fun formatWithSign(amount: Long, isIncome: Boolean): String {
+        val sign = if (isIncome) "+ " else "- "
+        return sign + format(kotlin.math.abs(amount))
     }
 
     fun formatWithSign(amount: Double, isIncome: Boolean): String {

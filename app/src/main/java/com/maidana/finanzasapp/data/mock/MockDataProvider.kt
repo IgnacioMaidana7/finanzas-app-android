@@ -43,7 +43,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_01",
             title = "Sueldo Septiembre",
-            amount = 950000.0,
+            amount = 950000L,
             type = TransactionType.INGRESO,
             category = "Salario",
             date = 1726000000000L
@@ -51,7 +51,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_02",
             title = "Supermercado Coto",
-            amount = 78500.0,
+            amount = 78500L,
             type = TransactionType.GASTO,
             category = "Alimentación",
             date = 1726100000000L
@@ -59,7 +59,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_03",
             title = "Alquiler Departamento",
-            amount = 220000.0,
+            amount = 220000L,
             type = TransactionType.GASTO,
             category = "Vivienda",
             date = 1726150000000L
@@ -67,7 +67,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_04",
             title = "Rendimientos CEDEARs",
-            amount = 65000.0,
+            amount = 65000L,
             type = TransactionType.INGRESO,
             category = "Inversión",
             date = 1726200000000L
@@ -75,7 +75,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_05",
             title = "Cena La Cabrera",
-            amount = 28400.0,
+            amount = 28400L,
             type = TransactionType.GASTO,
             category = "Ocio",
             date = 1726250000000L
@@ -83,7 +83,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_06",
             title = "Combustible YPF",
-            amount = 32000.0,
+            amount = 32000L,
             type = TransactionType.GASTO,
             category = "Transporte",
             date = 1726300000000L
@@ -91,7 +91,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_07",
             title = "Internet Fibertel & Celular",
-            amount = 18500.0,
+            amount = 18500L,
             type = TransactionType.GASTO,
             category = "Servicios",
             date = 1726350000000L
@@ -99,7 +99,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_08",
             title = "Proyecto Freelance UI",
-            amount = 140000.0,
+            amount = 140000L,
             type = TransactionType.INGRESO,
             category = "Ingresos Extra",
             date = 1726400000000L
@@ -107,7 +107,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_09",
             title = "Membresía Gimnasio",
-            amount = 16000.0,
+            amount = 16000L,
             type = TransactionType.GASTO,
             category = "Salud",
             date = 1726450000000L
@@ -115,7 +115,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_10",
             title = "Farmacia Farmacity",
-            amount = 9400.0,
+            amount = 9400L,
             type = TransactionType.GASTO,
             category = "Salud",
             date = 1726500000000L
@@ -123,7 +123,7 @@ object MockDataProvider {
         Transaction(
             id = "tx_11",
             title = "Café de Especialidad",
-            amount = 4800.0,
+            amount = 4800L,
             type = TransactionType.GASTO,
             category = "Ocio",
             date = 1726550000000L

@@ -22,9 +22,11 @@ import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +49,8 @@ import java.util.Locale
 fun TransactionRow(
     transaction: Transaction,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null
 ) {
     val isIncome = transaction.type == TransactionType.INGRESO
     val iconInfo = getCategoryIcon(transaction.category)
@@ -111,6 +114,21 @@ fun TransactionRow(
                 fontWeight = FontWeight.Bold,
                 color = if (isIncome) IncomeGreen else ExpenseRed
             )
+
+            if (onDeleteClick != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                IconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = "Eliminar movimiento",
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.75f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(libs.firebase.analytics)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
