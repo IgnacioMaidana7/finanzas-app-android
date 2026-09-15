@@ -128,7 +128,11 @@ fun AppNavGraph(
         }
 
         composable(route = Screen.Statistics.route) {
-            StatisticsScreen()
+            StatisticsScreen(
+                onNavigateToNewTransaction = {
+                    navController.navigate(Screen.NewTransaction.route)
+                }
+            )
         }
 
         // --- Pantallas Secundarias / Formularios ---

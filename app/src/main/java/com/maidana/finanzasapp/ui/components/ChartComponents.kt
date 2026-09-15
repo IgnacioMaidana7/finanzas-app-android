@@ -27,21 +27,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.maidana.finanzasapp.data.mock.CategoryExpenseStat
-import com.maidana.finanzasapp.data.mock.MonthlyEvolutionPoint
+import com.maidana.finanzasapp.data.model.CategoryExpenseStat
+import com.maidana.finanzasapp.data.model.MonthlyEvolutionPoint
 import com.maidana.finanzasapp.ui.theme.ExpenseRed
 import com.maidana.finanzasapp.ui.theme.IncomeGreen
+import kotlin.math.roundToInt
 
 @Composable
 fun ComparativeIncomeExpenseChart(
-    income: Double,
-    expense: Double,
+    income: Long,
+    expense: Long,
     modifier: Modifier = Modifier
 ) {
-    val total = (income + expense).coerceAtLeast(1.0)
-    val incomeFraction = (income / total).toFloat()
-    val expenseFraction = (expense / total).toFloat()
+    val total = income + expense
+    val hasData = total > 0L
+    val incomeFraction = if (hasData) (income.toFloat() / total.toFloat()) else 0f
+    val expenseFraction = if (hasData) (expense.toFloat() / total.toFloat()) else 0f
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -60,25 +63,48 @@ fun ComparativeIncomeExpenseChart(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Barra proporcional dividida
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(16.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
+            if (!hasData) {
                 Box(
                     modifier = Modifier
-                        .weight(incomeFraction.coerceAtLeast(0.02f))
-                        .fillMaxHeight()
-                        .background(IncomeGreen)
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Box(
+                        .fillMaxWidth()
+                        .height(16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sin movimientos en este período",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                Row(
                     modifier = Modifier
-                        .weight(expenseFraction.coerceAtLeast(0.02f))
-                        .fillMaxHeight()
-                        .background(ExpenseRed)
-                )
+                        .fillMaxWidth()
+                        .height(16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                ) {
+                    if (incomeFraction > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .weight(incomeFraction)
+                                .fillMaxHeight()
+                                .background(IncomeGreen)
+                        )
+                    }
+                    if (incomeFraction > 0f && expenseFraction > 0f) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                    }
+                    if (expenseFraction > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .weight(expenseFraction)
+                                .fillMaxHeight()
+                                .background(ExpenseRed)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -98,7 +124,7 @@ fun ComparativeIncomeExpenseChart(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Ingresos (${(incomeFraction * 100).toInt()}%)",
+                            text = "Ingresos (${(incomeFraction * 100).roundToInt()}%)",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -122,7 +148,7 @@ fun ComparativeIncomeExpenseChart(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "Gastos (${(expenseFraction * 100).toInt()}%)",
+                            text = "Gastos (${(expenseFraction * 100).roundToInt()}%)",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -144,7 +170,7 @@ fun EvolutionBarChart(
     points: List<MonthlyEvolutionPoint>,
     modifier: Modifier = Modifier
 ) {
-    val maxBalance = points.maxOfOrNull { it.balance } ?: 1.0
+    val maxBalance = points.maxOfOrNull { it.balance.coerceAtLeast(0L) } ?: 0L
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -162,38 +188,66 @@ fun EvolutionBarChart(
             )
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                points.forEach { point ->
-                    val heightFraction = (point.balance / maxBalance).toFloat().coerceIn(0.1f, 1f)
-                    val animatedHeight by animateFloatAsState(
-                        targetValue = heightFraction,
-                        animationSpec = tween(durationMillis = 500),
-                        label = "barHeight"
+            if (points.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sin datos en el período seleccionado.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    points.forEach { point ->
+                        val heightFraction = if (maxBalance > 0L && point.balance > 0L) {
+                            (point.balance.toFloat() / maxBalance.toFloat()).coerceIn(0.12f, 1f)
+                        } else {
+                            0.08f
+                        }
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.55f)
-                                .fillMaxHeight(animatedHeight)
-                                .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
-                                .background(MaterialTheme.colorScheme.primary)
+                        val animatedHeight by animateFloatAsState(
+                            targetValue = heightFraction,
+                            animationSpec = tween(durationMillis = 500),
+                            label = "barHeight"
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = point.month,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+
+                        val barColor = when {
+                            point.balance > 0L -> MaterialTheme.colorScheme.primary
+                            point.balance < 0L -> ExpenseRed
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.55f)
+                                    .fillMaxHeight(animatedHeight)
+                                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                    .background(barColor)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = point.month,
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -223,60 +277,78 @@ fun CategoryDistributionCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Barra segmentada multicolor
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(14.dp)
-                    .clip(RoundedCornerShape(7.dp))
-            ) {
-                categories.forEach { cat ->
-                    Box(
-                        modifier = Modifier
-                            .weight(cat.percentage.coerceAtLeast(0.02f))
-                            .fillMaxHeight()
-                            .background(cat.color)
+            if (categories.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No se registraron gastos en el período seleccionado.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            }
+            } else {
+                // Barra segmentada multicolor
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                ) {
+                    categories.forEach { cat ->
+                        Box(
+                            modifier = Modifier
+                                .weight(cat.percentage.coerceAtLeast(0.02f))
+                                .fillMaxHeight()
+                                .background(cat.color)
+                        )
+                    }
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Lista detallada de categorías
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                categories.forEach { cat ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(CircleShape)
-                                    .background(cat.color)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = cat.category,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                // Lista detallada de categorías ordenada descendentemente
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    categories.forEach { cat ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(cat.color)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = cat.category,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = CurrencyUtils.format(cat.amount),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "${(cat.percentage * 100).toInt()}%",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = CurrencyUtils.format(cat.amount),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "${(cat.percentage * 100).roundToInt()}%",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
@@ -284,3 +356,4 @@ fun CategoryDistributionCard(
         }
     }
 }
+
