@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.maidana.finanzasapp.data.model.CategoryConstants
 import com.maidana.finanzasapp.ui.components.AppTopBar
 import com.maidana.finanzasapp.ui.components.getCategoryIcon
 import java.util.Calendar
@@ -65,17 +66,7 @@ fun NewBudgetScreen(
     val uiState by viewModel.uiState.collectAsState()
     val saveState by viewModel.saveState.collectAsState()
 
-    val categories = listOf(
-        "Alimentación",
-        "Vivienda",
-        "Ocio",
-        "Transporte",
-        "Servicios",
-        "Salud",
-        "Educación",
-        "Tecnología",
-        "Otros"
-    )
+    val categories = CategoryConstants.EXPENSE_CATEGORIES
 
     var selectedCategory by remember { mutableStateOf(categories.first()) }
     var limitAmountText by remember { mutableStateOf("") }

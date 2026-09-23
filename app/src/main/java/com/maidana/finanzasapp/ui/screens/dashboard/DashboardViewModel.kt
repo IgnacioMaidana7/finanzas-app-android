@@ -2,7 +2,6 @@ package com.maidana.finanzasapp.ui.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maidana.finanzasapp.data.mock.MockDataProvider
 import com.maidana.finanzasapp.data.model.Budget
 import com.maidana.finanzasapp.data.model.SavingsGoal
 import com.maidana.finanzasapp.data.model.Transaction
@@ -67,7 +66,8 @@ class DashboardViewModel(
     private val _uiState = MutableStateFlow(
         DashboardUiState(
             userName = authRepository.getCurrentUser()?.displayName?.ifBlank { null }
-                ?: MockDataProvider.user.displayName.ifBlank { "Usuario" }
+                ?: authRepository.getCurrentUser()?.email?.substringBefore("@")
+                ?: "Usuario"
         )
     )
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
@@ -82,8 +82,9 @@ class DashboardViewModel(
     private fun observeUser() {
         viewModelScope.launch {
             authRepository.currentUser.collect { user ->
-                val name = user?.displayName?.ifBlank { user.email.substringBefore("@") }
-                    ?: MockDataProvider.user.displayName.ifBlank { "Usuario" }
+                val name = user?.displayName?.ifBlank { null }
+                    ?: user?.email?.substringBefore("@")
+                    ?: "Usuario"
                 _uiState.update { it.copy(userName = name) }
             }
         }

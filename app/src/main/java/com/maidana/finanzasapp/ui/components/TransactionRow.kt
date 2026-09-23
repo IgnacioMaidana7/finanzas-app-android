@@ -21,7 +21,9 @@ import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -144,6 +146,8 @@ fun getCategoryIcon(category: String): CategoryIconInfo {
         "transporte", "combustible" -> CategoryIconInfo(Icons.Default.DirectionsCar, Color(0xFF8B5CF6))
         "servicios", "internet" -> CategoryIconInfo(Icons.Default.Bolt, Color(0xFF14B8A6))
         "salud", "farmacia" -> CategoryIconInfo(Icons.Default.MedicalServices, Color(0xFFEF4444))
+        "educación" -> CategoryIconInfo(Icons.Default.School, Color(0xFF6366F1))
+        "tecnología" -> CategoryIconInfo(Icons.Default.Devices, Color(0xFF0EA5E9))
         "inversión", "ingresos extra" -> CategoryIconInfo(Icons.AutoMirrored.Filled.TrendingUp, Color(0xFF059669))
         else -> CategoryIconInfo(Icons.Default.Receipt, Color(0xFF64748B))
     }

@@ -1,6 +1,7 @@
 package com.maidana.finanzasapp
 
-import com.maidana.finanzasapp.data.mock.MockDataProvider
+import com.maidana.finanzasapp.data.model.Budget
+import com.maidana.finanzasapp.data.model.SavingsGoal
 import com.maidana.finanzasapp.data.model.Transaction
 import com.maidana.finanzasapp.data.model.TransactionType
 import com.maidana.finanzasapp.data.model.User
@@ -34,6 +35,38 @@ class DashboardViewModelTest {
         set(2026, Calendar.SEPTEMBER, 15, 12, 0, 0)
     }.timeInMillis
 
+    private val sampleBudgets = listOf(
+        Budget(
+            id = "bg_01",
+            category = "Alimentación",
+            limitAmount = 150000L,
+            spentAmount = 98500L,
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
+        ),
+        Budget(
+            id = "bg_02",
+            category = "Vivienda",
+            limitAmount = 250000L,
+            spentAmount = 238500L,
+            month = 9,
+            year = 2026,
+            createdAt = 1726000000000L
+        )
+    )
+
+    private val sampleGoals = listOf(
+        SavingsGoal(
+            id = "meta-emergencia",
+            name = "Fondo de Emergencia",
+            targetAmount = 1000000L,
+            savedAmount = 650000L,
+            targetDateString = "Diciembre 2026",
+            createdAt = 1719800000000L
+        )
+    )
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -41,8 +74,8 @@ class DashboardViewModelTest {
             currentUserMock = User(id = "uid_123", email = "test@finanzasapp.com", displayName = "Ignacio")
         }
         fakeTransactionRepository = FakeTransactionRepository()
-        fakeBudgetRepository = FakeBudgetRepository(MockDataProvider.budgets)
-        fakeGoalRepository = FakeGoalRepository(MockDataProvider.goals)
+        fakeBudgetRepository = FakeBudgetRepository(sampleBudgets)
+        fakeGoalRepository = FakeGoalRepository(sampleGoals)
         viewModel = DashboardViewModel(
             authRepository = fakeAuthRepository,
             transactionRepository = fakeTransactionRepository,

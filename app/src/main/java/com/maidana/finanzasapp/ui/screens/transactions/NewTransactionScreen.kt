@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.maidana.finanzasapp.data.model.CategoryConstants
 import com.maidana.finanzasapp.data.model.TransactionType
 import com.maidana.finanzasapp.ui.components.AppTopBar
 import com.maidana.finanzasapp.ui.components.getCategoryIcon
@@ -84,9 +85,9 @@ fun NewTransactionScreen(
     }
 
     val categories = if (type == TransactionType.GASTO) {
-        listOf("Alimentación", "Vivienda", "Ocio", "Transporte", "Servicios", "Salud")
+        CategoryConstants.EXPENSE_CATEGORIES
     } else {
-        listOf("Salario", "Inversión", "Ingresos Extra", "Otros")
+        CategoryConstants.INCOME_CATEGORIES
     }
 
     Scaffold(
