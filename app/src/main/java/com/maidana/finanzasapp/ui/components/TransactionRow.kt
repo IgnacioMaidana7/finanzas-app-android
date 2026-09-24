@@ -102,8 +102,13 @@ fun TransactionRow(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                val subtitleText = if (transaction.accountName.isNotBlank()) {
+                    "${transaction.category} • ${transaction.accountName} • $formattedDate"
+                } else {
+                    "${transaction.category} • $formattedDate"
+                }
                 Text(
-                    text = "${transaction.category} • $formattedDate",
+                    text = subtitleText,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -138,17 +143,18 @@ fun TransactionRow(
 data class CategoryIconInfo(val icon: ImageVector, val color: Color)
 
 fun getCategoryIcon(category: String): CategoryIconInfo {
-    return when (category.lowercase()) {
-        "salario" -> CategoryIconInfo(Icons.Default.Payments, Color(0xFF10B981))
-        "alimentación", "supermercado" -> CategoryIconInfo(Icons.Default.Restaurant, Color(0xFFF59E0B))
-        "vivienda", "alquiler" -> CategoryIconInfo(Icons.Default.Home, Color(0xFF3B82F6))
-        "ocio", "restaurante", "café" -> CategoryIconInfo(Icons.Default.LocalCafe, Color(0xFFEC4899))
-        "transporte", "combustible" -> CategoryIconInfo(Icons.Default.DirectionsCar, Color(0xFF8B5CF6))
-        "servicios", "internet" -> CategoryIconInfo(Icons.Default.Bolt, Color(0xFF14B8A6))
-        "salud", "farmacia" -> CategoryIconInfo(Icons.Default.MedicalServices, Color(0xFFEF4444))
-        "educación" -> CategoryIconInfo(Icons.Default.School, Color(0xFF6366F1))
-        "tecnología" -> CategoryIconInfo(Icons.Default.Devices, Color(0xFF0EA5E9))
-        "inversión", "ingresos extra" -> CategoryIconInfo(Icons.AutoMirrored.Filled.TrendingUp, Color(0xFF059669))
+    val clean = category.lowercase().trim()
+    return when {
+        clean == "salario" -> CategoryIconInfo(Icons.Default.Payments, Color(0xFF10B981))
+        clean.contains("alimen") || clean.contains("super") || clean.contains("comida") -> CategoryIconInfo(Icons.Default.Restaurant, Color(0xFFF59E0B))
+        clean.contains("vivien") || clean.contains("alquiler") || clean.contains("casa") -> CategoryIconInfo(Icons.Default.Home, Color(0xFF3B82F6))
+        clean.contains("ocio") || clean.contains("cafe") || clean.contains("café") || clean.contains("salida") -> CategoryIconInfo(Icons.Default.LocalCafe, Color(0xFFEC4899))
+        clean.contains("transpor") || clean.contains("combust") || clean.contains("auto") -> CategoryIconInfo(Icons.Default.DirectionsCar, Color(0xFF8B5CF6))
+        clean.contains("servici") || clean.contains("internet") || clean.contains("luz") -> CategoryIconInfo(Icons.Default.Bolt, Color(0xFF14B8A6))
+        clean.contains("salud") || clean.contains("farmacia") || clean.contains("medic") -> CategoryIconInfo(Icons.Default.MedicalServices, Color(0xFFEF4444))
+        clean.contains("educa") || clean.contains("univer") || clean.contains("curso") -> CategoryIconInfo(Icons.Default.School, Color(0xFF6366F1))
+        clean.contains("tecno") || clean.contains("compu") || clean.contains("celular") -> CategoryIconInfo(Icons.Default.Devices, Color(0xFF0EA5E9))
+        clean.contains("inver") || clean.contains("extra") -> CategoryIconInfo(Icons.AutoMirrored.Filled.TrendingUp, Color(0xFF059669))
         else -> CategoryIconInfo(Icons.Default.Receipt, Color(0xFF64748B))
     }
 }

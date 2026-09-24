@@ -60,7 +60,8 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isLoading = uiState.authState is AuthState.Loading
 
-    var name by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -143,12 +144,28 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedTextField(
-                    value = name,
+                    value = firstName,
                     onValueChange = {
-                        name = it
+                        firstName = it
                         viewModel.clearError()
                     },
-                    label = { Text("Nombre completo") },
+                    label = { Text("Nombre") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Person, contentDescription = null)
+                    },
+                    singleLine = true,
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = lastName,
+                    onValueChange = {
+                        lastName = it
+                        viewModel.clearError()
+                    },
+                    label = { Text("Apellido") },
                     leadingIcon = {
                         Icon(Icons.Default.Person, contentDescription = null)
                     },
@@ -224,7 +241,8 @@ fun RegisterScreen(
                 Button(
                     onClick = {
                         viewModel.register(
-                            name = name,
+                            firstName = firstName,
+                            lastName = lastName,
                             email = email,
                             password = password,
                             confirmPassword = confirmPassword

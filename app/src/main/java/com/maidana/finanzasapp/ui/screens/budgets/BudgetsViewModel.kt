@@ -3,6 +3,7 @@ package com.maidana.finanzasapp.ui.screens.budgets
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maidana.finanzasapp.data.model.Budget
+import com.maidana.finanzasapp.data.model.CategoryConstants
 import com.maidana.finanzasapp.data.model.Transaction
 import com.maidana.finanzasapp.data.model.TransactionType
 import com.maidana.finanzasapp.data.repository.BudgetRepository
@@ -160,7 +161,7 @@ class BudgetsViewModel(
         }
     }
 
-    fun saveBudget(category: String, limitAmount: Long, month: Int, year: Int) {
+    fun saveBudget(category: String, limitAmount: Long, month: Int, year: Int, categoryId: String = "") {
         val catTrimmed = category.trim()
         if (catTrimmed.isBlank()) {
             _saveState.value = SaveBudgetState.Error("Debes seleccionar una categoría.")
@@ -175,8 +176,17 @@ class BudgetsViewModel(
             return
         }
 
+        val resolvedCategoryId = categoryId.trim().ifBlank {
+            CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull {
+                it.name.equals(catTrimmed, ignoreCase = true)
+            }?.id.orEmpty()
+        }
+
         val isDuplicate = allRawBudgets.any {
-            it.month == month && it.year == year && categoriesMatch(it.category, catTrimmed)
+            it.month == month && it.year == year && (
+                (it.categoryId.isNotBlank() && resolvedCategoryId.isNotBlank() && it.categoryId == resolvedCategoryId) ||
+                categoriesMatch(it.category, catTrimmed)
+            )
         }
         if (isDuplicate) {
             _saveState.value = SaveBudgetState.Error(
@@ -189,6 +199,7 @@ class BudgetsViewModel(
         viewModelScope.launch {
             val newBudget = Budget(
                 category = catTrimmed,
+                categoryId = resolvedCategoryId,
                 limitAmount = limitAmount,
                 month = month,
                 year = year,
@@ -241,7 +252,7 @@ class BudgetsViewModel(
                 .filter { tx ->
                     tx.type == TransactionType.GASTO &&
                     matchesPeriod(tx.date, budget.month, budget.year) &&
-                    categoriesMatch(budget.category, tx.category)
+                    categoriesMatch(budget, tx)
                 }
                 .sumOf { it.amount }
         }
@@ -249,6 +260,13 @@ class BudgetsViewModel(
         fun matchesPeriod(timestamp: Long, month: Int, year: Int): Boolean {
             val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
             return (cal.get(Calendar.MONTH) + 1) == month && cal.get(Calendar.YEAR) == year
+        }
+
+        fun categoriesMatch(budget: Budget, transaction: Transaction): Boolean {
+            if (budget.categoryId.isNotBlank() && transaction.categoryId.isNotBlank()) {
+                if (budget.categoryId == transaction.categoryId) return true
+            }
+            return categoriesMatch(budget.category, transaction.category)
         }
 
         fun categoriesMatch(budgetCategory: String, transactionCategory: String): Boolean {

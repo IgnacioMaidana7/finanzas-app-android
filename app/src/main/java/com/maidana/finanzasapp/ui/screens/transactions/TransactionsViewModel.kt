@@ -2,6 +2,8 @@ package com.maidana.finanzasapp.ui.screens.transactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maidana.finanzasapp.data.model.Account
+import com.maidana.finanzasapp.data.model.CategoryConstants
 import com.maidana.finanzasapp.data.model.Transaction
 import com.maidana.finanzasapp.data.model.TransactionType
 import com.maidana.finanzasapp.data.repository.FirestoreTransactionRepository
@@ -119,7 +121,10 @@ class TransactionsViewModel(
         amountText: String,
         type: TransactionType,
         category: String,
-        dateString: String
+        dateString: String,
+        categoryId: String = "",
+        accountId: String = Account.DEFAULT_CASH_ID,
+        accountName: String = "Efectivo"
     ) {
         if (_saveState.value is SaveTransactionState.Loading) return
 
@@ -144,14 +149,22 @@ class TransactionsViewModel(
             return
         }
 
-        // 3. Validar Descripción
+        // 3. Validar Cuenta / Origen del dinero
+        val cleanAccountId = accountId.trim()
+        val cleanAccountName = accountName.trim()
+        if (cleanAccountId.isBlank()) {
+            _saveState.value = SaveTransactionState.Error("Debes seleccionar una cuenta de origen.")
+            return
+        }
+
+        // 4. Validar Descripción
         val cleanTitle = title.trim()
         if (cleanTitle.isBlank()) {
             _saveState.value = SaveTransactionState.Error("Ingresa una descripción o nota para el movimiento.")
             return
         }
 
-        // 4. Validar Fecha
+        // 5. Validar Fecha
         val parsedDate = try {
             val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
                 isLenient = false
@@ -168,6 +181,12 @@ class TransactionsViewModel(
 
         _saveState.value = SaveTransactionState.Loading
 
+        val resolvedCategoryId = categoryId.trim().ifBlank {
+            CategoryConstants.ALL_PREDEFINED_CATEGORIES.firstOrNull {
+                it.type == type && it.name.equals(category.trim(), ignoreCase = true)
+            }?.id.orEmpty()
+        }
+
         viewModelScope.launch {
             val newTransaction = Transaction(
                 id = "",
@@ -176,6 +195,9 @@ class TransactionsViewModel(
                 amount = rawAmount,
                 type = type,
                 category = category.trim(),
+                categoryId = resolvedCategoryId,
+                accountId = cleanAccountId,
+                accountName = cleanAccountName,
                 date = parsedDate,
                 createdAt = System.currentTimeMillis()
             )

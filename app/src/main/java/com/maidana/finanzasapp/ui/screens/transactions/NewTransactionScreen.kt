@@ -51,10 +51,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.maidana.finanzasapp.data.model.Account
 import com.maidana.finanzasapp.data.model.CategoryConstants
 import com.maidana.finanzasapp.data.model.TransactionType
+import com.maidana.finanzasapp.ui.components.AccountSelectorSection
 import com.maidana.finanzasapp.ui.components.AppTopBar
-import com.maidana.finanzasapp.ui.components.getCategoryIcon
+import com.maidana.finanzasapp.ui.components.CategorySelectorSection
+import com.maidana.finanzasapp.ui.components.ThousandsSeparatorVisualTransformation
+import com.maidana.finanzasapp.ui.screens.accounts.AccountViewModel
+import com.maidana.finanzasapp.ui.screens.categories.CategoryViewModel
 import com.maidana.finanzasapp.ui.theme.ExpenseRed
 import com.maidana.finanzasapp.ui.theme.IncomeGreen
 import java.text.SimpleDateFormat
@@ -65,16 +70,37 @@ import java.util.Locale
 fun NewTransactionScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: TransactionsViewModel = viewModel()
+    viewModel: TransactionsViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = viewModel(),
+    accountViewModel: AccountViewModel = viewModel()
 ) {
     val saveState by viewModel.saveState.collectAsState()
+    val accountUiState by accountViewModel.uiState.collectAsState()
 
     var type by remember { mutableStateOf(TransactionType.GASTO) }
     var amountText by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("Alimentación") }
+    val defaultExpenseCategory = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull()?.name ?: "Alimentación"
+    val defaultExpenseCategoryId = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull()?.id.orEmpty()
+    val defaultIncomeCategory = CategoryConstants.PREDEFINED_INCOME_CATEGORIES.firstOrNull()?.name ?: "Salario"
+    val defaultIncomeCategoryId = CategoryConstants.PREDEFINED_INCOME_CATEGORIES.firstOrNull()?.id.orEmpty()
+
+    var selectedCategory by remember { mutableStateOf(defaultExpenseCategory) }
+    var selectedCategoryId by remember { mutableStateOf(defaultExpenseCategoryId) }
+
+    var selectedAccountId by remember { mutableStateOf(Account.DEFAULT_CASH_ID) }
+    var selectedAccountName by remember { mutableStateOf(Account.DEFAULT_CASH_ACCOUNT.name) }
+
     var dateString by remember {
         mutableStateOf(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()))
+    }
+
+    LaunchedEffect(accountUiState.accounts) {
+        if (selectedAccountId.isBlank() && accountUiState.accounts.isNotEmpty()) {
+            val defaultAcc = accountUiState.activeAccounts().firstOrNull() ?: Account.DEFAULT_CASH_ACCOUNT
+            selectedAccountId = defaultAcc.id
+            selectedAccountName = defaultAcc.name
+        }
     }
 
     LaunchedEffect(saveState) {
@@ -148,7 +174,8 @@ fun NewTransactionScreen(
                             .background(if (isGasto) ExpenseRed else Color.Transparent)
                             .clickable {
                                 type = TransactionType.GASTO
-                                selectedCategory = "Alimentación"
+                                selectedCategory = defaultExpenseCategory
+                                selectedCategoryId = defaultExpenseCategoryId
                             }
                             .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center
@@ -168,7 +195,8 @@ fun NewTransactionScreen(
                             .background(if (isIngreso) IncomeGreen else Color.Transparent)
                             .clickable {
                                 type = TransactionType.INGRESO
-                                selectedCategory = "Salario"
+                                selectedCategory = defaultIncomeCategory
+                                selectedCategoryId = defaultIncomeCategoryId
                             }
                             .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center
@@ -199,8 +227,9 @@ fun NewTransactionScreen(
                     OutlinedTextField(
                         value = amountText,
                         onValueChange = { input ->
-                            if (input.all { it.isDigit() }) {
-                                amountText = input
+                            val digitsOnly = input.filter { it.isDigit() }
+                            if (digitsOnly.length <= 15) {
+                                amountText = if (digitsOnly.length > 1) digitsOnly.trimStart('0').ifEmpty { "0" } else digitsOnly
                             }
                         },
                         placeholder = { Text("0", style = MaterialTheme.typography.headlineMedium) },
@@ -212,6 +241,7 @@ fun NewTransactionScreen(
                                 color = if (type == TransactionType.INGRESO) IncomeGreen else ExpenseRed
                             )
                         },
+                        visualTransformation = ThousandsSeparatorVisualTransformation(),
                         textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -221,59 +251,26 @@ fun NewTransactionScreen(
                 }
             }
 
-            // Selector de Categoría
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Categoría",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(categories) { category ->
-                        val isSelected = selectedCategory == category
-                        val iconInfo = getCategoryIcon(category)
-
-                        Card(
-                            modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 2.dp else 0.5.dp),
-                            onClick = { selectedCategory = category }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(iconInfo.color.copy(alpha = 0.2f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = iconInfo.icon,
-                                        contentDescription = null,
-                                        tint = iconInfo.color,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                }
-                                Text(
-                                    text = category,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
+            // Selector de Cuenta / Origen del dinero
+            AccountSelectorSection(
+                accounts = accountUiState.accounts,
+                selectedAccountId = selectedAccountId,
+                onAccountSelected = { acc ->
+                    selectedAccountId = acc.id
+                    selectedAccountName = acc.name
                 }
-            }
+            )
+
+            // Selector de Categoría (Centralizado con soporte de personalizadas)
+            CategorySelectorSection(
+                selectedCategoryName = selectedCategory,
+                onCategorySelected = { cat ->
+                    selectedCategory = cat.name
+                    selectedCategoryId = cat.id
+                },
+                type = type,
+                categoryViewModel = categoryViewModel
+            )
 
             // Descripción
             OutlinedTextField(
@@ -314,7 +311,10 @@ fun NewTransactionScreen(
                         amountText = amountText,
                         type = type,
                         category = selectedCategory,
-                        dateString = dateString
+                        dateString = dateString,
+                        categoryId = selectedCategoryId,
+                        accountId = selectedAccountId,
+                        accountName = selectedAccountName
                     )
                 },
                 enabled = !isLoading,

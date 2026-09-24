@@ -94,14 +94,15 @@ class AuthViewModel(
     }
 
     fun register(
-        name: String,
+        firstName: String,
+        lastName: String,
         email: String,
         password: String,
         confirmPassword: String
     ) {
         if (_uiState.value.authState is AuthState.Loading) return
 
-        val validationError = validateRegistrationInput(name, email, password, confirmPassword)
+        val validationError = validateRegistrationInput(firstName, lastName, email, password, confirmPassword)
         if (validationError != null) {
             _uiState.update { it.copy(authState = AuthState.Error(validationError)) }
             return
@@ -111,9 +112,10 @@ class AuthViewModel(
 
         viewModelScope.launch {
             val result = authRepository.register(
+                firstName = firstName.trim(),
+                lastName = lastName.trim(),
                 email = email.trim(),
-                password = password,
-                displayName = name.trim()
+                password = password
             )
             result.fold(
                 onSuccess = { user ->
@@ -130,6 +132,25 @@ class AuthViewModel(
                 }
             )
         }
+    }
+
+    // Sobrecarga de compatibilidad para código y tests existentes
+    fun register(
+        name: String,
+        email: String,
+        password: String,
+        confirmPassword: String
+    ) {
+        val parts = name.trim().split(" ", limit = 2)
+        val first = parts.getOrNull(0).orEmpty()
+        val last = parts.getOrNull(1).orEmpty()
+        register(
+            firstName = first,
+            lastName = last,
+            email = email,
+            password = password,
+            confirmPassword = confirmPassword
+        )
     }
 
     fun logout() {
@@ -158,13 +179,17 @@ class AuthViewModel(
         private val EMAIL_REGEX = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
 
         fun validateRegistrationInput(
-            name: String,
+            firstName: String,
+            lastName: String,
             email: String,
             password: String,
             confirmPassword: String
         ): String? {
-            if (name.trim().isBlank()) {
+            if (firstName.trim().isBlank()) {
                 return "El nombre es obligatorio."
+            }
+            if (lastName.trim().isBlank()) {
+                return "El apellido es obligatorio."
             }
             val trimmedEmail = email.trim()
             if (trimmedEmail.isBlank()) {
@@ -183,6 +208,22 @@ class AuthViewModel(
                 return "Las contraseñas no coinciden."
             }
             return null
+        }
+
+        // Sobrecarga de retrocompatibilidad
+        fun validateRegistrationInput(
+            name: String,
+            email: String,
+            password: String,
+            confirmPassword: String
+        ): String? {
+            if (name.trim().isBlank()) {
+                return "El nombre es obligatorio."
+            }
+            val parts = name.trim().split(" ", limit = 2)
+            val first = parts.getOrNull(0).orEmpty()
+            val last = parts.getOrNull(1).orEmpty().ifBlank { first }
+            return validateRegistrationInput(first, last, email, password, confirmPassword)
         }
     }
 }

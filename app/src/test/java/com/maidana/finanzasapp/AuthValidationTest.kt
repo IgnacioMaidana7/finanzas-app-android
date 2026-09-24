@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -23,8 +22,12 @@ import org.junit.Test
 class FakeAuthRepository : AuthRepository {
     var shouldFailLogin = false
     var shouldFailRegister = false
-    var currentUserMock: User? = null
     private val _currentUserFlow = MutableStateFlow<User?>(null)
+    var currentUserMock: User? = null
+        set(value) {
+            field = value
+            _currentUserFlow.value = value
+        }
 
     override val currentUser: Flow<User?> = _currentUserFlow
 
@@ -36,7 +39,35 @@ class FakeAuthRepository : AuthRepository {
         return if (shouldFailLogin) {
             Result.failure(Exception("Credenciales inválidas."))
         } else {
-            val user = User(id = "test_uid", email = email, displayName = "Usuario Test")
+            val user = User(
+                id = "test_uid",
+                email = email,
+                firstName = "Usuario",
+                lastName = "Test",
+                displayName = "Usuario Test"
+            )
+            currentUserMock = user
+            _currentUserFlow.value = user
+            Result.success(user)
+        }
+    }
+
+    override suspend fun register(
+        firstName: String,
+        lastName: String,
+        email: String,
+        password: String
+    ): Result<User> {
+        return if (shouldFailRegister) {
+            Result.failure(Exception("Este correo electrónico ya se encuentra registrado."))
+        } else {
+            val user = User(
+                id = "new_uid",
+                email = email,
+                firstName = firstName,
+                lastName = lastName,
+                displayName = "$firstName $lastName".trim()
+            )
             currentUserMock = user
             _currentUserFlow.value = user
             Result.success(user)
@@ -44,14 +75,10 @@ class FakeAuthRepository : AuthRepository {
     }
 
     override suspend fun register(email: String, password: String, displayName: String): Result<User> {
-        return if (shouldFailRegister) {
-            Result.failure(Exception("Este correo electrónico ya se encuentra registrado."))
-        } else {
-            val user = User(id = "new_uid", email = email, displayName = displayName)
-            currentUserMock = user
-            _currentUserFlow.value = user
-            Result.success(user)
-        }
+        val parts = displayName.trim().split(" ", limit = 2)
+        val first = parts.getOrNull(0).orEmpty()
+        val last = parts.getOrNull(1).orEmpty()
+        return register(firstName = first, lastName = last, email = email, password = password)
     }
 
     override suspend fun logout(): Result<Unit> {
@@ -88,9 +115,34 @@ class AuthValidationTest {
     }
 
     @Test
+    fun validateRegistration_emptyFirstName_returnsError() {
+        val error = AuthViewModel.validateRegistrationInput(
+            firstName = "",
+            lastName = "Maidana",
+            email = "test@finanzasapp.com",
+            password = "password123",
+            confirmPassword = "password123"
+        )
+        assertEquals("El nombre es obligatorio.", error)
+    }
+
+    @Test
+    fun validateRegistration_emptyLastName_returnsError() {
+        val error = AuthViewModel.validateRegistrationInput(
+            firstName = "Ignacio",
+            lastName = "   ",
+            email = "test@finanzasapp.com",
+            password = "password123",
+            confirmPassword = "password123"
+        )
+        assertEquals("El apellido es obligatorio.", error)
+    }
+
+    @Test
     fun validateRegistration_emptyEmail_returnsError() {
         val error = AuthViewModel.validateRegistrationInput(
-            name = "Ignacio",
+            firstName = "Ignacio",
+            lastName = "Maidana",
             email = "   ",
             password = "password123",
             confirmPassword = "password123"
@@ -101,7 +153,8 @@ class AuthValidationTest {
     @Test
     fun validateRegistration_invalidEmailFormat_returnsError() {
         val error = AuthViewModel.validateRegistrationInput(
-            name = "Ignacio",
+            firstName = "Ignacio",
+            lastName = "Maidana",
             email = "correo-invalido",
             password = "password123",
             confirmPassword = "password123"
@@ -112,7 +165,8 @@ class AuthValidationTest {
     @Test
     fun validateRegistration_shortPassword_returnsError() {
         val error = AuthViewModel.validateRegistrationInput(
-            name = "Ignacio",
+            firstName = "Ignacio",
+            lastName = "Maidana",
             email = "ignacio@test.com",
             password = "1234",
             confirmPassword = "1234"
@@ -123,7 +177,8 @@ class AuthValidationTest {
     @Test
     fun validateRegistration_mismatchedPasswords_returnsError() {
         val error = AuthViewModel.validateRegistrationInput(
-            name = "Ignacio",
+            firstName = "Ignacio",
+            lastName = "Maidana",
             email = "ignacio@test.com",
             password = "password123",
             confirmPassword = "password456"
@@ -134,7 +189,8 @@ class AuthValidationTest {
     @Test
     fun validateRegistration_validInputs_returnsNull() {
         val error = AuthViewModel.validateRegistrationInput(
-            name = "Ignacio Maidana",
+            firstName = "Ignacio",
+            lastName = "Maidana",
             email = "ignacio@test.com",
             password = "password123",
             confirmPassword = "password123"
@@ -216,7 +272,8 @@ class AuthValidationTest {
         val viewModel = AuthViewModel(repository)
 
         viewModel.register(
-            name = "Nuevo Usuario",
+            firstName = "Ignacio",
+            lastName = "Maidana",
             email = "nuevo@test.com",
             password = "password123",
             confirmPassword = "password123"
@@ -224,8 +281,12 @@ class AuthValidationTest {
 
         val state = viewModel.uiState.value.authState
         assertTrue(state is AuthState.Authenticated)
-        assertEquals("nuevo@test.com", (state as AuthState.Authenticated).user.email)
-        assertEquals("Nuevo Usuario", (state as AuthState.Authenticated).user.displayName)
+        val user = (state as AuthState.Authenticated).user
+        assertEquals("nuevo@test.com", user.email)
+        assertEquals("Ignacio", user.firstName)
+        assertEquals("Maidana", user.lastName)
+        assertEquals("Ignacio", user.greetingName)
+        assertEquals("Ignacio Maidana", user.displayName)
     }
 
     @Test
@@ -234,7 +295,8 @@ class AuthValidationTest {
         val viewModel = AuthViewModel(repository)
 
         viewModel.register(
-            name = "Usuario Existente",
+            firstName = "Usuario",
+            lastName = "Existente",
             email = "existente@test.com",
             password = "password123",
             confirmPassword = "password123"
@@ -259,4 +321,3 @@ class AuthValidationTest {
         assertFalse(viewModel.isUserAuthenticated())
     }
 }
-

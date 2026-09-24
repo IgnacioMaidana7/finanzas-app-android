@@ -2,6 +2,7 @@ package com.maidana.finanzasapp.ui.screens.statistics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +38,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.maidana.finanzasapp.data.model.StatisticsPeriod
+import com.maidana.finanzasapp.ui.components.AccountDistributionCard
+import com.maidana.finanzasapp.ui.components.BudgetPerformanceCard
 import com.maidana.finanzasapp.ui.components.CategoryDistributionCard
-import com.maidana.finanzasapp.ui.components.ComparativeIncomeExpenseChart
 import com.maidana.finanzasapp.ui.components.CurrencyUtils
 import com.maidana.finanzasapp.ui.components.EvolutionBarChart
+import com.maidana.finanzasapp.ui.components.MonthlyIncomeVsExpenseBarChart
 import com.maidana.finanzasapp.ui.theme.ExpenseRed
 import com.maidana.finanzasapp.ui.theme.IncomeGreen
 
@@ -68,38 +72,34 @@ fun StatisticsScreen(
             color = MaterialTheme.colorScheme.primary
         )
 
-        // Selector de Período (1M, 3M, 6M, Año)
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        // Selector de Período Horizontal Scrollable
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                uiState.periods.forEach { period ->
-                    val isSelected = period == uiState.selectedPeriod
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-                            )
-                            .clickable { viewModel.setPeriod(period) }
-                            .padding(vertical = 10.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = period,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+            uiState.periods.forEach { period ->
+                val currentEnum = StatisticsPeriod.fromString(uiState.selectedPeriod)
+                val periodEnum = StatisticsPeriod.fromString(period)
+                val isSelected = currentEnum == periodEnum
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                         )
-                    }
+                        .clickable { viewModel.setPeriod(period) }
+                        .padding(horizontal = 14.dp, vertical = 9.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = period,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
@@ -193,10 +193,19 @@ fun StatisticsScreen(
                         }
                     }
                 }
+
+                // Aún cuando el período esté vacío, mostrar la distribución patrimonial por cuenta si existen cuentas
+                if (uiState.accountDistributions.isNotEmpty()) {
+                    AccountDistributionCard(
+                        accounts = uiState.accountDistributions
+                    )
+                }
             }
 
             else -> {
-                // Resumen del período seleccionado
+                // =============================================================
+                // RESUMEN SUPERIOR: KPIS FINANCIEROS
+                // =============================================================
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -231,7 +240,7 @@ fun StatisticsScreen(
                                     .padding(horizontal = 10.dp, vertical = 6.dp)
                             ) {
                                 Text(
-                                    text = if (isPositive) "Superávit Positivo" else "Déficit del Período",
+                                    text = if (isPositive) "Superávit" else "Déficit",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = badgeColor
@@ -291,20 +300,40 @@ fun StatisticsScreen(
                     }
                 }
 
-                // 1. Sección Ingresos vs Gastos
-                ComparativeIncomeExpenseChart(
-                    income = uiState.summary.income,
-                    expense = uiState.summary.expense
+                // =============================================================
+                // GRÁFICO 1: COMPARATIVA INGRESOS VS GASTOS (TEMPORAL)
+                // =============================================================
+                MonthlyIncomeVsExpenseBarChart(
+                    points = uiState.monthlyComparisons
                 )
 
-                // 2. Sección Evolución del Saldo
+                // =============================================================
+                // GRÁFICO 2: GASTOS POR CATEGORÍA (TOP 5 + OTROS)
+                // =============================================================
+                CategoryDistributionCard(
+                    categories = uiState.categoryExpenses,
+                    allCategories = uiState.allCategoryExpenses
+                )
+
+                // =============================================================
+                // GRÁFICO 3: EVOLUCIÓN DEL SALDO (PATRIMONIO LÍQUIDO)
+                // =============================================================
                 EvolutionBarChart(
                     points = uiState.balanceEvolution
                 )
 
-                // 3. Sección Gastos por Categoría y Listado
-                CategoryDistributionCard(
-                    categories = uiState.categoryExpenses
+                // =============================================================
+                // GRÁFICO 4: DISTRIBUCIÓN POR CUENTA (EFECTIVO VS DIGITAL)
+                // =============================================================
+                AccountDistributionCard(
+                    accounts = uiState.accountDistributions
+                )
+
+                // =============================================================
+                // GRÁFICO 5: PRESUPUESTO VS GASTO REAL
+                // =============================================================
+                BudgetPerformanceCard(
+                    budgets = uiState.budgetPerformances
                 )
             }
         }

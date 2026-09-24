@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maidana.finanzasapp.ui.components.AppTopBar
 import com.maidana.finanzasapp.ui.components.CurrencyUtils
+import com.maidana.finanzasapp.ui.components.ThousandsSeparatorVisualTransformation
 import com.maidana.finanzasapp.ui.theme.IncomeGreen
 
 @Composable
@@ -515,14 +516,16 @@ fun GoalDetailScreen(
                         OutlinedTextField(
                             value = aporteAmountText,
                             onValueChange = { input ->
-                                if (input.all { it.isDigit() }) {
-                                    aporteAmountText = input
+                                val digitsOnly = input.filter { it.isDigit() }
+                                if (digitsOnly.length <= 15) {
+                                    aporteAmountText = if (digitsOnly.length > 1) digitsOnly.trimStart('0').ifEmpty { "0" } else digitsOnly
                                     aporteValidationError = null
                                 }
                             },
                             label = { Text("Monto del Aporte") },
                             placeholder = { Text("15000") },
                             prefix = { Text("$ ") },
+                            visualTransformation = ThousandsSeparatorVisualTransformation(),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             shape = RoundedCornerShape(10.dp),

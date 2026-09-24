@@ -24,7 +24,9 @@ import com.maidana.finanzasapp.ui.screens.transactions.TransactionsScreen
 import com.maidana.finanzasapp.ui.screens.transactions.TransactionsViewModel
 
 
+import com.maidana.finanzasapp.ui.screens.accounts.AccountViewModel
 import com.maidana.finanzasapp.ui.screens.auth.AuthViewModel
+import com.maidana.finanzasapp.ui.screens.categories.CategoryViewModel
 
 @Composable
 fun AppNavGraph(
@@ -35,6 +37,8 @@ fun AppNavGraph(
     val transactionsViewModel: TransactionsViewModel = viewModel()
     val budgetsViewModel: BudgetsViewModel = viewModel()
     val goalsViewModel: GoalsViewModel = viewModel()
+    val categoryViewModel: CategoryViewModel = viewModel()
+    val accountViewModel: AccountViewModel = viewModel()
 
     val startDestination = if (authViewModel.isUserAuthenticated()) {
         Screen.Dashboard.route
@@ -79,6 +83,7 @@ fun AppNavGraph(
         // --- Pantallas Principales ---
         composable(route = Screen.Dashboard.route) {
             DashboardScreen(
+                accountViewModel = accountViewModel,
                 onNavigateToNewTransaction = {
                     navController.navigate(Screen.NewTransaction.route)
                 },
@@ -139,6 +144,8 @@ fun AppNavGraph(
         composable(route = Screen.NewTransaction.route) {
             NewTransactionScreen(
                 viewModel = transactionsViewModel,
+                categoryViewModel = categoryViewModel,
+                accountViewModel = accountViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -146,6 +153,7 @@ fun AppNavGraph(
         composable(route = Screen.NewBudget.route) {
             NewBudgetScreen(
                 viewModel = budgetsViewModel,
+                categoryViewModel = categoryViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

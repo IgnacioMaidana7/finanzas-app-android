@@ -47,28 +47,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maidana.finanzasapp.data.model.CategoryConstants
+import com.maidana.finanzasapp.data.model.TransactionType
 import com.maidana.finanzasapp.ui.components.AppTopBar
-import com.maidana.finanzasapp.ui.components.getCategoryIcon
+import com.maidana.finanzasapp.ui.components.CategorySelectorSection
+import com.maidana.finanzasapp.ui.components.ThousandsSeparatorVisualTransformation
+import com.maidana.finanzasapp.ui.screens.categories.CategoryViewModel
 import java.util.Calendar
 
 @Composable
 fun NewBudgetScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: BudgetsViewModel = viewModel()
+    viewModel: BudgetsViewModel = viewModel(),
+    categoryViewModel: CategoryViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val saveState by viewModel.saveState.collectAsState()
 
-    val categories = CategoryConstants.EXPENSE_CATEGORIES
+    val defaultExpenseCategory = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull()?.name ?: "Alimentación"
+    val defaultExpenseCategoryId = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull()?.id.orEmpty()
 
-    var selectedCategory by remember { mutableStateOf(categories.first()) }
+    var selectedCategory by remember { mutableStateOf(defaultExpenseCategory) }
+    var selectedCategoryId by remember { mutableStateOf(defaultExpenseCategoryId) }
     var limitAmountText by remember { mutableStateOf("") }
     var selectedMonth by remember { mutableIntStateOf(uiState.selectedMonth) }
     var selectedYear by remember { mutableIntStateOf(uiState.selectedYear) }
@@ -129,60 +134,18 @@ fun NewBudgetScreen(
                 }
             }
 
-            // Selección de categoría
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Selecciona la Categoría",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(categories) { cat ->
-                        val isSelected = cat == selectedCategory
-                        val iconInfo = getCategoryIcon(cat)
-
-                        Card(
-                            modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 2.dp else 0.5.dp),
-                            onClick = {
-                                selectedCategory = cat
-                                validationError = null
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(iconInfo.color.copy(alpha = 0.2f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = iconInfo.icon,
-                                        contentDescription = null,
-                                        tint = iconInfo.color,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                }
-                                Text(
-                                    text = cat,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            // Selección de categoría (Centralizada con categorías del sistema y personalizadas)
+            CategorySelectorSection(
+                selectedCategoryName = selectedCategory,
+                onCategorySelected = { cat ->
+                    selectedCategory = cat.name
+                    selectedCategoryId = cat.id
+                    validationError = null
+                },
+                type = TransactionType.GASTO,
+                categoryViewModel = categoryViewModel,
+                title = "Selecciona la Categoría"
+            )
 
             // Input Límite Mensual en pesos enteros
             Card(
@@ -201,8 +164,9 @@ fun NewBudgetScreen(
                     OutlinedTextField(
                         value = limitAmountText,
                         onValueChange = { input ->
-                            if (input.all { it.isDigit() }) {
-                                limitAmountText = input
+                            val digitsOnly = input.filter { it.isDigit() }
+                            if (digitsOnly.length <= 15) {
+                                limitAmountText = if (digitsOnly.length > 1) digitsOnly.trimStart('0').ifEmpty { "0" } else digitsOnly
                                 validationError = null
                             }
                         },
@@ -215,6 +179,7 @@ fun NewBudgetScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         },
+                        visualTransformation = ThousandsSeparatorVisualTransformation(),
                         textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -307,7 +272,8 @@ fun NewBudgetScreen(
                         category = selectedCategory,
                         limitAmount = limit,
                         month = selectedMonth,
-                        year = selectedYear
+                        year = selectedYear,
+                        categoryId = selectedCategoryId
                     )
                 },
                 enabled = !isLoading,

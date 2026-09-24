@@ -66,6 +66,10 @@ fun BudgetsScreen(
     var budgetToDelete by remember { mutableStateOf<Budget?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
+
     LaunchedEffect(deleteState) {
         when (deleteState) {
             is DeleteBudgetState.Error -> {

@@ -91,6 +91,11 @@ class DashboardViewModelTest {
     }
 
     @Test
+    fun initialState_userName_reflectsGreetingName() {
+        assertEquals("Ignacio", viewModel.uiState.value.userName)
+    }
+
+    @Test
     fun initialState_whenRepositoryEmpty_isDashboardStatusEmpty() {
         val state = viewModel.uiState.value
         assertTrue(state.isEmpty)

@@ -2,13 +2,17 @@ package com.maidana.finanzasapp.ui.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maidana.finanzasapp.data.model.Account
+import com.maidana.finanzasapp.data.model.AccountType
 import com.maidana.finanzasapp.data.model.Budget
 import com.maidana.finanzasapp.data.model.SavingsGoal
 import com.maidana.finanzasapp.data.model.Transaction
 import com.maidana.finanzasapp.data.model.TransactionType
+import com.maidana.finanzasapp.data.repository.AccountRepository
 import com.maidana.finanzasapp.data.repository.AuthRepository
 import com.maidana.finanzasapp.data.repository.BudgetRepository
 import com.maidana.finanzasapp.data.repository.FirebaseAuthRepository
+import com.maidana.finanzasapp.data.repository.FirestoreAccountRepository
 import com.maidana.finanzasapp.data.repository.FirestoreBudgetRepository
 import com.maidana.finanzasapp.data.repository.GoalRepository
 import com.maidana.finanzasapp.data.repository.FirestoreGoalRepository
@@ -37,6 +41,9 @@ data class DashboardUiState(
     val userName: String = "Usuario",
     val status: DashboardStatus = DashboardStatus.Loading,
     val totalBalance: Long = 0L,
+    val cashBalance: Long = 0L,
+    val digitalBalance: Long = 0L,
+    val accounts: List<Account> = emptyList(),
     val monthlyIncome: Long = 0L,
     val monthlyExpense: Long = 0L,
     val monthlySavings: Long = 0L,
@@ -60,14 +67,17 @@ class DashboardViewModel(
     private val transactionRepository: TransactionRepository = FirestoreTransactionRepository(),
     private val budgetRepository: BudgetRepository = FirestoreBudgetRepository(),
     private val goalRepository: GoalRepository = FirestoreGoalRepository(),
+    private val accountRepository: AccountRepository? = null,
     private val currentTimeProvider: () -> Long = { System.currentTimeMillis() }
 ) : ViewModel() {
 
+    private val safeAccountRepository: AccountRepository? by lazy {
+        accountRepository ?: runCatching { FirestoreAccountRepository() }.getOrNull()
+    }
+
     private val _uiState = MutableStateFlow(
         DashboardUiState(
-            userName = authRepository.getCurrentUser()?.displayName?.ifBlank { null }
-                ?: authRepository.getCurrentUser()?.email?.substringBefore("@")
-                ?: "Usuario"
+            userName = authRepository.getCurrentUser()?.greetingName ?: "Usuario"
         )
     )
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
@@ -82,9 +92,7 @@ class DashboardViewModel(
     private fun observeUser() {
         viewModelScope.launch {
             authRepository.currentUser.collect { user ->
-                val name = user?.displayName?.ifBlank { null }
-                    ?: user?.email?.substringBefore("@")
-                    ?: "Usuario"
+                val name = user?.greetingName ?: "Usuario"
                 _uiState.update { it.copy(userName = name) }
             }
         }
@@ -95,30 +103,55 @@ class DashboardViewModel(
         _uiState.update { it.copy(status = DashboardStatus.Loading, errorMessage = null) }
 
         loadDataJob = viewModelScope.launch {
+            val accountsFlow = safeAccountRepository?.getAccounts() ?: kotlinx.coroutines.flow.flowOf(emptyList())
             combine(
                 transactionRepository.getTransactions(),
                 budgetRepository.getBudgets(),
-                goalRepository.getGoals()
-            ) { transactions, rawBudgets, goals ->
+                goalRepository.getGoals(),
+                accountsFlow
+            ) { transactions, rawBudgets, goals, accounts ->
                 val now = currentTimeProvider()
                 val nowCal = Calendar.getInstance().apply { timeInMillis = now }
                 val currentMonth = nowCal.get(Calendar.MONTH) + 1
                 val currentYear = nowCal.get(Calendar.YEAR)
 
-                val newStatus = if (transactions.isEmpty()) {
+                val newStatus = if (transactions.isEmpty() && accounts.all { it.initialBalance == 0L }) {
                     DashboardStatus.Empty
                 } else {
                     DashboardStatus.Success
                 }
 
-                // 1. Saldo Total histórico
+                // 1. Saldos derivados e información de Cuentas
+                val totalInitialBalance = accounts.sumOf { it.initialBalance }
                 val totalIncomeHistorical = transactions
                     .filter { it.type == TransactionType.INGRESO }
                     .sumOf { it.amount }
                 val totalExpenseHistorical = transactions
                     .filter { it.type == TransactionType.GASTO }
                     .sumOf { it.amount }
-                val totalBalance = totalIncomeHistorical - totalExpenseHistorical
+                val totalBalance = totalInitialBalance + totalIncomeHistorical - totalExpenseHistorical
+
+                val cashAccounts = accounts.filter { it.type == AccountType.CASH }
+                val cashAccountIds = cashAccounts.map { it.id }.filter { it.isNotBlank() }.toSet()
+                val cashInitial = cashAccounts.sumOf { it.initialBalance }
+                val cashIncome = transactions
+                    .filter { it.type == TransactionType.INGRESO && it.accountId in cashAccountIds }
+                    .sumOf { it.amount }
+                val cashExpense = transactions
+                    .filter { it.type == TransactionType.GASTO && it.accountId in cashAccountIds }
+                    .sumOf { it.amount }
+                val cashBalance = cashInitial + cashIncome - cashExpense
+
+                val digitalAccounts = accounts.filter { it.type == AccountType.DIGITAL }
+                val digitalAccountIds = digitalAccounts.map { it.id }.filter { it.isNotBlank() }.toSet()
+                val digitalInitial = digitalAccounts.sumOf { it.initialBalance }
+                val digitalIncome = transactions
+                    .filter { it.type == TransactionType.INGRESO && it.accountId in digitalAccountIds }
+                    .sumOf { it.amount }
+                val digitalExpense = transactions
+                    .filter { it.type == TransactionType.GASTO && it.accountId in digitalAccountIds }
+                    .sumOf { it.amount }
+                val digitalBalance = digitalInitial + digitalIncome - digitalExpense
 
                 // 2. Período: mes y año actual
                 val currentMonthTransactions = transactions.filter { isSameMonthAndYear(it.date, now) }
@@ -152,7 +185,7 @@ class DashboardViewModel(
                         val spent = currentMonthTransactions
                             .filter { tx ->
                                 tx.type == TransactionType.GASTO &&
-                                BudgetsViewModel.categoriesMatch(budget.category, tx.category)
+                                BudgetsViewModel.categoriesMatch(budget, tx)
                             }
                             .sumOf { it.amount }
                         budget.copy(spentAmount = spent)
@@ -162,7 +195,6 @@ class DashboardViewModel(
                 val recent = transactions.sortedByDescending { it.date }.take(4)
 
                 // 5. Meta destacada determinística desde Firestore:
-                // Incompleta con fecha límite más próxima; si no tienen fecha o todas cumplidas, la última creada; o null
                 val featuredGoal = goals
                     .filter { !it.isCompleted }
                     .minByOrNull { if (it.targetDate > 0L) it.targetDate else it.createdAt }
@@ -172,6 +204,9 @@ class DashboardViewModel(
                     it.copy(
                         status = newStatus,
                         totalBalance = totalBalance,
+                        cashBalance = cashBalance,
+                        digitalBalance = digitalBalance,
+                        accounts = accounts,
                         monthlyIncome = monthlyIncome,
                         monthlyExpense = monthlyExpense,
                         monthlySavings = monthlySavings,

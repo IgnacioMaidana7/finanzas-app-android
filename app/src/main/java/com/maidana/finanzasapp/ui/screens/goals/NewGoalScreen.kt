@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maidana.finanzasapp.ui.components.AppTopBar
+import com.maidana.finanzasapp.ui.components.ThousandsSeparatorVisualTransformation
 
 @Composable
 fun NewGoalScreen(
@@ -159,8 +160,9 @@ fun NewGoalScreen(
                     OutlinedTextField(
                         value = targetAmountText,
                         onValueChange = { input ->
-                            if (input.all { it.isDigit() }) {
-                                targetAmountText = input
+                            val digitsOnly = input.filter { it.isDigit() }
+                            if (digitsOnly.length <= 15) {
+                                targetAmountText = if (digitsOnly.length > 1) digitsOnly.trimStart('0').ifEmpty { "0" } else digitsOnly
                                 validationError = null
                             }
                         },
@@ -173,6 +175,7 @@ fun NewGoalScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         },
+                        visualTransformation = ThousandsSeparatorVisualTransformation(),
                         textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -186,13 +189,15 @@ fun NewGoalScreen(
             OutlinedTextField(
                 value = initialAmountText,
                 onValueChange = { input ->
-                    if (input.all { it.isDigit() }) {
-                        initialAmountText = input
+                    val digitsOnly = input.filter { it.isDigit() }
+                    if (digitsOnly.length <= 15) {
+                        initialAmountText = if (digitsOnly.length > 1) digitsOnly.trimStart('0').ifEmpty { "0" } else digitsOnly
                         validationError = null
                     }
                 },
                 label = { Text("Monto inicial ya ahorrado (Opcional)") },
                 prefix = { Text("$ ") },
+                visualTransformation = ThousandsSeparatorVisualTransformation(),
                 leadingIcon = {
                     Icon(Icons.Default.Savings, contentDescription = null)
                 },

@@ -21,7 +21,6 @@ class FirestoreTransactionRepository(
     override fun getTransactions(): Flow<List<Transaction>> = callbackFlow {
         val uid = auth.currentUser?.uid
         if (uid == null) {
-            trySend(emptyList())
             close(IllegalStateException("No hay una sesión de usuario activa."))
             return@callbackFlow
         }
@@ -60,6 +59,9 @@ class FirestoreTransactionRepository(
                 "type" to transaction.type.name,
                 "amount" to transaction.amount,
                 "category" to transaction.category,
+                "categoryId" to transaction.categoryId,
+                "accountId" to transaction.accountId,
+                "accountName" to transaction.accountName,
                 "description" to desc,
                 "title" to desc,
                 "date" to transaction.date,
@@ -111,6 +113,9 @@ class FirestoreTransactionRepository(
             val amountNumber = get("amount") as? Number
             val amount = amountNumber?.toLong() ?: 0L
             val category = getString("category").orEmpty()
+            val categoryId = getString("categoryId").orEmpty()
+            val accountId = getString("accountId").orEmpty()
+            val accountName = getString("accountName").orEmpty()
             val desc = getString("description") ?: getString("title").orEmpty()
             val date = getLong("date") ?: (get("date") as? Number)?.toLong() ?: System.currentTimeMillis()
             val createdAt = getLong("createdAt") ?: (get("createdAt") as? Number)?.toLong() ?: date
@@ -122,6 +127,9 @@ class FirestoreTransactionRepository(
                 amount = amount,
                 type = type,
                 category = category,
+                categoryId = categoryId,
+                accountId = accountId,
+                accountName = accountName,
                 date = date,
                 createdAt = createdAt
             )

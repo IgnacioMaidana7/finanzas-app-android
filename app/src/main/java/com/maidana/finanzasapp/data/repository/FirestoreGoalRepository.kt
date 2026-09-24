@@ -21,7 +21,6 @@ class FirestoreGoalRepository(
     override fun getGoals(): Flow<List<SavingsGoal>> = callbackFlow {
         val uid = auth.currentUser?.uid
         if (uid == null) {
-            trySend(emptyList())
             close(IllegalStateException("No hay una sesión de usuario activa."))
             return@callbackFlow
         }
@@ -51,7 +50,6 @@ class FirestoreGoalRepository(
     override fun getGoalById(id: String): Flow<SavingsGoal?> = callbackFlow {
         val uid = auth.currentUser?.uid
         if (uid == null) {
-            trySend(null)
             close(IllegalStateException("No hay una sesión de usuario activa."))
             return@callbackFlow
         }

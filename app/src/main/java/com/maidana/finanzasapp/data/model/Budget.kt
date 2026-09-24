@@ -9,6 +9,7 @@ enum class BudgetStatus {
 data class Budget(
     val id: String = "",
     val category: String = "",
+    val categoryId: String = "",
     val limitAmount: Long = 0L,
     val month: Int = 0,
     val year: Int = 0,

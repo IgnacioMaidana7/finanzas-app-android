@@ -20,7 +20,6 @@ class FirestoreBudgetRepository(
     override fun getBudgets(): Flow<List<Budget>> = callbackFlow {
         val uid = auth.currentUser?.uid
         if (uid == null) {
-            trySend(emptyList())
             close(IllegalStateException("No hay una sesión de usuario activa."))
             return@callbackFlow
         }
@@ -57,6 +56,7 @@ class FirestoreBudgetRepository(
             // Importante: NO se guardan spentAmount, percentage ni remainingAmount en Firestore
             val data = hashMapOf(
                 "category" to budget.category,
+                "categoryId" to budget.categoryId,
                 "limitAmount" to budget.limitAmount,
                 "month" to budget.month,
                 "year" to budget.year,
@@ -100,6 +100,7 @@ class FirestoreBudgetRepository(
     private fun DocumentSnapshot.toBudget(): Budget? {
         return try {
             val category = getString("category").orEmpty()
+            val categoryId = getString("categoryId").orEmpty()
             val limitNumber = get("limitAmount") as? Number
             val limitAmount = limitNumber?.toLong() ?: 0L
             val month = (get("month") as? Number)?.toInt() ?: 0
@@ -109,6 +110,7 @@ class FirestoreBudgetRepository(
             Budget(
                 id = id,
                 category = category,
+                categoryId = categoryId,
                 limitAmount = limitAmount,
                 month = month,
                 year = year,

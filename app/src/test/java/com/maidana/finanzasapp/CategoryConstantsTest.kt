@@ -38,4 +38,20 @@ class CategoryConstantsTest {
             assertNotNull(iconInfo.color)
         }
     }
+
+    @Test
+    fun predefinedCategories_haveValidIdsAndProperties() {
+        val expenseCats = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES
+        assertEquals(CategoryConstants.EXPENSE_CATEGORIES.size, expenseCats.size)
+        assertTrue(expenseCats.all { it.isPredefined && it.isActive && it.id.startsWith("predefined_gasto_") })
+
+        val incomeCats = CategoryConstants.PREDEFINED_INCOME_CATEGORIES
+        assertEquals(CategoryConstants.INCOME_CATEGORIES.size, incomeCats.size)
+        assertTrue(incomeCats.all { it.isPredefined && it.isActive && it.id.startsWith("predefined_ingreso_") })
+
+        val all = CategoryConstants.ALL_PREDEFINED_CATEGORIES
+        assertEquals(expenseCats.size + incomeCats.size, all.size)
+        // All IDs must be distinct
+        assertEquals(all.size, all.map { it.id }.toSet().size)
+    }
 }
