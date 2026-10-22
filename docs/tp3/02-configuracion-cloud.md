@@ -4,8 +4,9 @@
 Proyecto Firebase confirmado por el usuario y por Android: `finanzasapp-1f76a`.
 La revisión de consola confirmó Firestore regional en Santiago (`southamerica-west1`),
 sin cuenta de facturación vinculada. Las APIs de Run, Cloud Build y Artifact
-Registry no aparecen habilitadas. Las reglas activas y los permisos efectivos
-del futuro backend todavía deben verificarse. No hay URL real de la API ni
+Registry no aparecen habilitadas. Las reglas activas exigen UID propietario;
+se revisaron IAM e índices existentes. Los permisos efectivos del futuro backend
+todavía deben verificarse. No hay URL real de la API ni
 evidencia de autoescalado cloud. Ver [revisión y capturas](revision-cloud.md).
 
 ## Configuración reproducible

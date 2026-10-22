@@ -30,7 +30,8 @@ Otros desafíos son aislar los datos personales, absorber picos de consultas,
 evitar depender de una instancia, mantener importes exactos y controlar el gasto.
 El repositorio no tenía reglas de Firestore versionadas ni infraestructura cloud.
 La consola confirmó una base regional en Santiago y ausencia de facturación
-vinculada. Las reglas efectivas todavía deben inspeccionarse.
+vinculada. Las reglas vigentes exigen UID propietario; los índices automáticos
+están habilitados y no hay índices manuales observados.
 
 ## Diseño propuesto e implementado en código
 

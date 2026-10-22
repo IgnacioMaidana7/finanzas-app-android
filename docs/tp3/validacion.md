@@ -24,6 +24,11 @@ producción, carga sintética, construcción/smoke test del contenedor y validac
 de Terraform. Su resultado remoto debe revisarse por separado; esta tabla
 informa ejecuciones locales, no presupone que CI terminó correctamente.
 
+**Verificación remota adicional:** el [workflow del commit 1fdc630](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/39868542859)
+terminó correctamente en GitHub, incluidos los dos trabajos (backend e
+infraestructura), construcción Docker y smoke test del contenedor con health
+check y rechazo 401 sin token. No corresponde a un despliegue Google Cloud.
+
 ## Qué verifican las pruebas
 
 Las pruebas HTTP comprueban aislamiento por UID, parámetros no admitidos,
@@ -82,8 +87,9 @@ Evidencias: [auditoría completa](evidence/dependency-audit.json),
 
 Se inspeccionaron en consola ubicación/modalidad de Firestore, vinculación de
 facturación y lista de APIs. Firestore es regional en Santiago; no hay facturación
-vinculada. Siguen pendientes reglas efectivas, permisos específicos del nuevo
-runtime, presupuesto y política organizacional. El
+vinculada. Se compararon las reglas publicadas, índices y roles existentes.
+Siguen pendientes permisos específicos del nuevo runtime, presupuesto y política
+organizacional. El
 contenedor debe construirse y revisarse antes del despliegue; la imagen base
 todavía usa la etiqueta oficial Node 22 y se recomienda fijar su digest tras
 esa revisión. El máximo de instancias y el timeout de Cloud Run no son topes
