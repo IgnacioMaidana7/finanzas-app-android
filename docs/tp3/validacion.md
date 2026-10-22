@@ -35,6 +35,11 @@ terminó correctamente en GitHub, incluidos los dos trabajos (backend e
 infraestructura), construcción Docker y smoke test del contenedor con health
 check y rechazo 401 sin token. No corresponde a un despliegue Google Cloud.
 
+La [ejecución de la adaptación Azure, commit a8fa4f7](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/39874500756)
+también terminó correctamente: backend de 19 pruebas, integración de ambos
+adaptadores, carga, auditoría, imagen Docker, smoke tests Admin y REST sin ADC,
+y validación/pruebas de las dos variantes Terraform.
+
 ## Qué verifican las pruebas
 
 Las pruebas HTTP comprueban aislamiento por UID, parámetros no admitidos,
