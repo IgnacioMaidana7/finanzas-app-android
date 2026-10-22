@@ -80,8 +80,10 @@ Evidencias: [auditoría completa](evidence/dependency-audit.json),
 
 ## Limitaciones que quedan abiertas
 
-No se inspeccionaron todavía las reglas y permisos activos, ubicación o modalidad
-de Firestore, facturación, APIs, presupuesto ni política organizacional. El
+Se inspeccionaron en consola ubicación/modalidad de Firestore, vinculación de
+facturación y lista de APIs. Firestore es regional en Santiago; no hay facturación
+vinculada. Siguen pendientes reglas efectivas, permisos específicos del nuevo
+runtime, presupuesto y política organizacional. El
 contenedor debe construirse y revisarse antes del despliegue; la imagen base
 todavía usa la etiqueta oficial Node 22 y se recomienda fijar su digest tras
 esa revisión. El máximo de instancias y el timeout de Cloud Run no son topes

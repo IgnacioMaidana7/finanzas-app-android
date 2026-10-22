@@ -16,7 +16,7 @@ flowchart TB
     RULES --> DB[(Firestore existente · users/UID)]
 
     V -->|HTTPS · Bearer ID token · mes UTC| LB[Entrada administrada Cloud Run · reparto de solicitudes]
-    subgraph REGION[Región Cloud Run por confirmar]
+    subgraph REGION[Cloud Run propuesto en Santiago · southamerica-west1]
         LB --> AUT[Autoescalado administrado · mínimo 0 / máximo 2]
         AUT --> N1[API Node · instancia 1 · sin estado]
         AUT --> N2[API Node · instancia 2 · cuando hay demanda]
@@ -51,8 +51,8 @@ administrados compartidos y sus límites siguen siendo dependencias del sistema.
 Cada instancia acepta hasta 16 solicitudes concurrentes, tiene 1 vCPU y 256 MiB.
 Las solicitudes no requieren afinidad, disco compartido ni sesión en memoria.
 Cloud Run administra la ejecución y recuperación regional; esta propuesta no
-incorpora recuperación activa en otra región. El nivel real de redundancia de
-Firestore depende de su ubicación, pendiente de inspección.
+incorpora recuperación activa en otra región. Firestore es una base regional en
+Santiago, verificada en consola; las copias programadas aparecen inhabilitadas.
 
 ## Fronteras de confianza
 

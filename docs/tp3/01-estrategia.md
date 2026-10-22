@@ -29,7 +29,8 @@ en cada dispositivo. Un backend nuevo no elimina por sí mismo esos listeners.
 Otros desafíos son aislar los datos personales, absorber picos de consultas,
 evitar depender de una instancia, mantener importes exactos y controlar el gasto.
 El repositorio no tenía reglas de Firestore versionadas ni infraestructura cloud.
-La seguridad y facturación efectivas del proyecto real todavía deben inspeccionarse.
+La consola confirmó una base regional en Santiago y ausencia de facturación
+vinculada. Las reglas efectivas todavía deben inspeccionarse.
 
 ## Diseño propuesto e implementado en código
 
@@ -40,7 +41,7 @@ La seguridad y facturación efectivas del proyecto real todavía deben inspeccio
 | Autoescalado | Escalado automático, mínimo 0 y máximo 2 al nivel del servicio | Reduce recursos ociosos; el arranque en frío es aceptado |
 | Capacidad | 1 vCPU, 256 MiB, concurrencia máxima 16 por instancia | Punto inicial a validar con métricas, no capacidad garantizada |
 | Redundancia | Ejecución regional administrada y reemplazo de instancias | No constituye recuperación activa en otra región |
-| Datos | Firestore administrado, sin estado persistente en contenedores | Disponibilidad depende de la ubicación/configuración real de la base |
+| Datos | Firestore regional existente en Santiago | Sin recuperación multirregional; copias programadas inhabilitadas |
 | Seguridad | Firebase ID token, revocación y UID derivado del token | Ningún parámetro del cliente elige el usuario consultado |
 | Costo de consulta | Un mes, proyección de tres campos, máximo 1.001 documentos | Hasta 1.000 movimientos; error explícito cuando se supera |
 
@@ -125,7 +126,8 @@ de consulta y concurrencia antes de subir el máximo.
 
 ## Costos y decisión de despliegue
 
-Elegir región después de conocer la ubicación de Firestore. Revisar CPU/tiempo,
+Se propone Santiago para compartir región con Firestore, cuya ubicación fue
+confirmada en consola. Revisar CPU/tiempo,
 memoria, solicitudes, lecturas, red, compilación, Artifact Registry y logs.
 Una consulta puede leer hasta 1.001 documentos: 400 consultas podrían sumar
 hasta 400.400 documentos, además de otros cargos aplicables. Esta multiplicación

@@ -1,6 +1,6 @@
 project_id = "finanzasapp-1f76a"
-# Example only. Confirm the actual Firestore location and pricing first.
-region                = "us-central1"
-image                 = "us-central1-docker.pkg.dev/finanzasapp-1f76a/tp3/summary@sha256:REPLACE_WITH_REAL_DIGEST"
+# Firestore location verified read-only on 2026-10-22. Cost approval is still required.
+region                = "southamerica-west1"
+image                 = "southamerica-west1-docker.pkg.dev/finanzasapp-1f76a/tp3/summary@sha256:REPLACE_WITH_REAL_DIGEST"
 max_instances         = 2
 approve_cloud_changes = false

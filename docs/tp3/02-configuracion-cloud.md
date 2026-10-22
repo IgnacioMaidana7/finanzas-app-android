@@ -2,8 +2,11 @@
 
 **Estado al 22/10/2026: preparado localmente, sin despliegue cloud.**
 Proyecto Firebase confirmado por el usuario y por Android: `finanzasapp-1f76a`.
-No se verificaron aún facturación, permisos, APIs, región de Firestore ni reglas
-activas. No hay URL real del backend ni evidencia de autoescalado cloud.
+La revisión de consola confirmó Firestore regional en Santiago (`southamerica-west1`),
+sin cuenta de facturación vinculada. Las APIs de Run, Cloud Build y Artifact
+Registry no aparecen habilitadas. Las reglas activas y los permisos efectivos
+del futuro backend todavía deben verificarse. No hay URL real de la API ni
+evidencia de autoescalado cloud. Ver [revisión y capturas](revision-cloud.md).
 
 ## Configuración reproducible
 
@@ -15,6 +18,7 @@ el archivo de ejemplo no es una configuración aplicada.
 | Parámetro | Valor propuesto |
 |---|---|
 | Servicio | `tp3-finanzas-summary` |
+| Región propuesta | `southamerica-west1`, junto a Firestore existente |
 | Escalado automático | mínimo 0, máximo 2 al nivel del servicio |
 | Contenedor | Node 22; usuario sin privilegios |
 | CPU / memoria | 1 vCPU / 256 MiB |
@@ -128,7 +132,7 @@ posterior hay que autorizar y cambiar esa protección expresamente. Evitar un
 
 | Evidencia | Qué debe demostrar | Estado |
 |---|---|---|
-| Preflight | Proyecto, ubicación, facturación y APIs | Pendiente de acceso |
+| Preflight | Proyecto, ubicación, facturación y APIs | Revisado en consola; sin cambios |
 | Plan Terraform | Recursos, imagen, IAM y parámetros aprobados | Pendiente de acceso |
 | Servicio desplegado | Revisión lista, origen real, CPU/memoria y cuenta runtime | Pendiente |
 | Escalado | Min 0, max 2, concurrencia 16 | Configurado en código; no aplicado |
