@@ -29,7 +29,7 @@ class CloudSummaryRepository(
 ) : SummaryRepository {
     override suspend fun fetch(month: String): CloudSummary {
         require(Regex("20\\d{2}-(0[1-9]|1[0-2])").matches(month))
-        check(baseUrl.matches(Regex("https://[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.run\\.app"))) {
+        check(baseUrl.matches(Regex("https://[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.(?:run\\.app|azurecontainerapps\\.io)"))) {
             "El resumen no está disponible."
         }
         val user = auth.currentUser ?: error("Iniciá sesión para consultar el resumen.")

@@ -9,6 +9,7 @@ import { deleteApp, getApp } from 'firebase-admin/app';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { firebaseDependencies } from '../src/firebase.mjs';
+import { firebaseRestDependencies } from '../src/firebase-rest.mjs';
 import { createHandler } from '../src/app.mjs';
 import { monthRange } from '../src/summary.mjs';
 
@@ -28,9 +29,13 @@ test('real emulator SDK: tenant isolation, date range, token rejection, rules an
   const environment = await initializeTestEnvironment({ projectId,
     firestore: { host: '127.0.0.1', port: 8088, rules: await readFile('../firestore.rules', 'utf8') }
   });
+  const restDependencies = firebaseRestDependencies(projectId, 'synthetic');
   const server = createServer(createHandler(dependencies));
+  const restServer = createServer(createHandler(restDependencies));
   server.listen(0, '127.0.0.1');
+  restServer.listen(0, '127.0.0.1');
   await once(server, 'listening');
+  if (!restServer.listening) await once(restServer, 'listening');
   const request = async (token, query = 'month=2026-10') => {
     const res = await fetch(`http://127.0.0.1:${server.address().port}/v1/summary?${query}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -39,7 +44,7 @@ test('real emulator SDK: tenant isolation, date range, token rejection, rules an
   };
   try {
     await environment.clearFirestore();
-    await auth.createUser({ uid: a });
+    await auth.createUser({ uid: a, email: 'tp3-synthetic-a@example.test', password: 'synthetic-local-Only-123!' });
     await auth.createUser({ uid: b });
     const customToken = await auth.createCustomToken(a);
     const signIn = await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=synthetic', {
@@ -60,6 +65,13 @@ test('real emulator SDK: tenant isolation, date range, token rejection, rules an
     assert.equal(summary.body.income, '9007199254740993');
     assert.equal(summary.body.expense, '30');
     assert.equal(summary.body.transactionCount, 2);
+    await restDependencies.verifyToken(idToken);
+    const restResponse = await fetch(`http://127.0.0.1:${restServer.address().port}/v1/summary?month=2026-10`, {
+      headers: { Authorization: `Bearer ${idToken}` }
+    });
+    const restBody = await restResponse.json();
+    assert.equal(restResponse.status, 200, JSON.stringify(restBody));
+    assert.deepEqual(restBody, summary.body);
 
     const own = environment.authenticatedContext(a).firestore();
     const anonymous = environment.unauthenticatedContext().firestore();
@@ -85,12 +97,18 @@ test('real emulator SDK: tenant isolation, date range, token rejection, rules an
     assert.equal(capped.body.error.code, 'SUMMARY_TOO_LARGE');
     await auth.updateUser(a, { disabled: true });
     assert.equal((await request(idToken)).status, 401);
+    assert.equal((await fetch(`http://127.0.0.1:${restServer.address().port}/v1/summary?month=2026-10`, {
+      headers: { Authorization: `Bearer ${idToken}` }
+    })).status, 401);
   } finally {
+    restServer.closeAllConnections();
+    await new Promise(resolve => restServer.close(resolve));
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
     await environment.clearFirestore();
     await environment.cleanup();
     await auth.deleteUsers([a, b]);
     await deleteApp(getApp());
+    await deleteApp(getApp('user-rest'));
   }
 });

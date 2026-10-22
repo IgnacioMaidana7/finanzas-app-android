@@ -2,9 +2,11 @@
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import math
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 S = 2
+AZURE = '--azure' in sys.argv
 im = Image.new('RGB', (1600*S, 1040*S), '#f5f7fb')
 d = ImageDraw.Draw(im)
 FONT = Path('C:/Windows/Fonts/segoeui.ttf')
@@ -31,10 +33,10 @@ def arrow(points, color='#536680', width=3):
 text(65, 35, 'Finanzas App · Arquitectura de escalabilidad', 39, bold=True)
 text(65, 91, 'TP3 · Arquitectura objetivo · 22 de octubre de 2026', 24)
 box((1090, 45, 1535, 110), fill='#fff0cc', outline='#dbb76c')
-text(1110, 62, 'Cloud Run: despliegue pendiente', 23, bold=True)
+text(1110, 62, 'Azure: despliegue pendiente' if AZURE else 'Cloud Run: despliegue pendiente', 23, bold=True)
 
 box((440, 205, 1110, 850), fill='#eaf2ff', outline='#7597ce', radius=24)
-text(470, 222, 'Cloud Run propuesto · Santiago', 26, bold=True)
+text(470, 222, 'Azure Container Apps · Chile Central' if AZURE else 'Cloud Run propuesto · Santiago', 26, bold=True)
 box((490, 285, 1060, 370))
 text(775, 300, 'Entrada HTTPS y reparto administrado', 24, bold=True, anchor='mt')
 text(775, 337, 'Firebase Auth en la API · sin afinidad de sesión', 21, anchor='mt')
@@ -53,7 +55,7 @@ box((490,640,1060,755), fill='#ffffff')
 text(775, 652, 'Dentro de cada instancia', 23, bold=True, anchor='mt')
 text(775, 687, 'Verificar token → UID → consulta → BigInt', 22, anchor='mt')
 text(775, 722, '1 mes UTC · hasta 1.001 documentos leídos', 21, anchor='mt')
-text(470, 783, '1 vCPU / 256 MiB · concurrencia 16 · sin claves', 23)
+text(470, 783, '0,25 vCPU / 0,5 GiB · umbral HTTP 16' if AZURE else '1 vCPU / 256 MiB · concurrencia 16 · sin claves', 23)
 text(470, 818, 'Logs y métricas operativas · sin UID ni importes', 21)
 
 box((65,285,370,555))
@@ -77,14 +79,14 @@ box((1180,535,1540,760), fill='#e8f4ed', outline='#77ab8e')
 text(1360, 555, 'Firestore · existente', 27, bold=True, anchor='mt')
 text(1360, 603, 'users / UID / transactions', 23, anchor='mt')
 text(1360, 643, 'Consulta por UID autenticado', 21, anchor='mt')
-text(1360, 685, 'Cuenta runtime · IAM lectura', 21, anchor='mt')
+text(1360, 685, 'ID token del usuario · Rules' if AZURE else 'Cuenta runtime · IAM lectura', 21, anchor='mt')
 text(1360, 722, 'southamerica-west1 · Santiago', 20, anchor='mt')
 arrow([(1060,720),(1133,720),(1133,735),(1180,735)], '#3a865a')
-text(1115, 765, 'ADC + IAM', 18, color='#3a865a')
+text(1115, 765, 'ID token' if AZURE else 'ADC + IAM', 18, color='#3a865a')
 arrow([(1360,760),(1360,910),(217,910),(217,555)], '#3a865a')
 text(500, 922, 'Acceso directo TP2 · Security Rules · sólo datos del propietario', 24, color='#326d4b')
-text(65, 982, 'Terraform + imagen por digest · pruebas locales sintéticas · no hay evidencia cloud todavía', 23)
+text(65, 982, 'ACR privado + identidad AcrPull · Terraform · balanceo y escalado reales pendientes' if AZURE else 'Terraform + imagen por digest · pruebas locales sintéticas · no hay evidencia cloud todavía', 23)
 
-target = ROOT / 'docs/tp3/arquitectura.png'
+target = ROOT / ('docs/tp3/azure/arquitectura.png' if AZURE else 'docs/tp3/arquitectura.png')
 im.save(target)
 print(target)

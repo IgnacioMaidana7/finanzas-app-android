@@ -43,7 +43,7 @@ export function createHandler({ verifyToken, readTransactions, log = () => {} })
         throw new ApiError(503, 'AUTH_UNAVAILABLE');
       }
       // UID comes exclusively from Firebase's verified claims; never from request input.
-      if (typeof claims?.uid !== 'string' || !claims.uid || claims.uid.includes('/') ||
+      if (typeof claims?.uid !== 'string' || !claims.uid || ['.', '..'].includes(claims.uid) || claims.uid.includes('/') ||
           claims.uid.length > 128) throw new ApiError(401, 'UNAUTHENTICATED');
       if ([...url.searchParams.keys()].some(key => key !== 'month') ||
           url.searchParams.getAll('month').length !== 1 ||
@@ -51,7 +51,7 @@ export function createHandler({ verifyToken, readTransactions, log = () => {} })
         throw new ApiError(400, 'INVALID_QUERY');
       }
       const range = monthRange(url.searchParams.get('month'));
-      const rows = await readTransactions(claims.uid, range);
+      const rows = await readTransactions(claims.uid, range, { idToken: header.slice(7), claims });
       const result = summarize(rows, range);
       code = 'SUMMARY_OK';
       send(200, result);

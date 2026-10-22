@@ -1,0 +1,8 @@
+subscription_id = "REPLACE_WITH_STUDENT_SUBSCRIPTION_ID"
+location        = "chilecentral"
+registry_name   = "tp3finanzasREPLACE"
+
+approve_credit_usage = false
+deploy_app           = false
+# Phase 2: image = "REGISTRY.azurecr.io/summary@sha256:REAL_DIGEST"
+# Provide TF_VAR_firebase_client_api_key locally, never commit credential files.

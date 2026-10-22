@@ -1,16 +1,16 @@
 {
   "environment": "local-synthetic-http",
-  "createdAt": "2026-10-22T22:50:31.810Z",
+  "createdAt": "2026-10-22T23:46:39.818Z",
   "node": "v22.14.0",
   "requests": 400,
   "concurrency": 16,
   "syntheticRowsPerRequest": 100,
   "injectedReadLatencyMs": 15,
   "errors": 0,
-  "elapsedMs": 1374,
-  "requestsPerSecond": 291.05,
-  "p50Ms": 43.86,
-  "p95Ms": 113.62,
-  "p99Ms": 217.95,
+  "elapsedMs": 939,
+  "requestsPerSecond": 425.96,
+  "p50Ms": 32.42,
+  "p95Ms": 53.33,
+  "p99Ms": 88.3,
   "provesCloudAutoscaling": false
 }

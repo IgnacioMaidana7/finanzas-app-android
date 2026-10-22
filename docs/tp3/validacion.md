@@ -8,16 +8,22 @@ existente, SDK Android 37. No se usaron cuentas ni movimientos reales en pruebas
 | Android `testDebugUnitTest` | **149 pruebas, 0 fallos** |
 | Android `assembleDebug` | Correcto, con URL de prueba y sin URL configurada |
 | Android `lintDebug` | Correcto; contiene advertencias heredadas, sin errores bloqueantes |
-| Backend `npm test` | **13 pruebas, 0 fallos** |
-| Firebase emuladores | **1 integración completa, correcta**, con dos usuarios sintéticos |
+| Backend `npm test` | **19 pruebas, 0 fallos**, incluidos acceso REST sin clave administrativa y revocación |
+| Firebase emuladores | **1 integración completa, correcta**, con dos usuarios sintéticos; adaptadores Admin y REST |
 | Instalación `npm ci` | Correcta, dependencias fijadas en lockfile |
 | Auditoría de producción | **0 vulnerabilidades conocidas** en la fecha de ejecución |
-| Terraform formato/validación | Correctos con Terraform 1.14.3 y provider Google 7.46.1 |
-| Terraform pruebas con proveedor simulado | **2 pruebas, 0 fallos**; no usan cuenta cloud |
+| Terraform formato/validación | Correctos para Google y Azure (azurerm 4.81.0), Terraform 1.14.3 |
+| Terraform pruebas con proveedor simulado | **4 pruebas, 0 fallos** (2 por variante); no usan cuenta cloud |
 | Carga HTTP local | **400 solicitudes, concurrencia 16, 0 errores** |
 | Cloud Run desplegado / carga cloud | **Pendiente** |
+| Azure Container Apps desplegado / carga cloud | **Pendiente de aprobación de consumo de crédito** |
 | Flujo Android contra backend real | **Pendiente** |
 | Imagen Docker ejecutada localmente | **No realizada:** Docker no está disponible en este equipo |
+
+La compilación, pruebas Android y lint se repitieron con un origen HTTPS
+`azurecontainerapps.io` de prueba tras ampliar la validación de URL. No se
+contactó ese origen. El beneficio Azure para Estudiantes está activo, con USD 100
+y consumo observado USD 0; [revisión y costos](azure/02-configuracion-cloud.md).
 
 El workflow de GitHub automatiza pruebas del backend, emuladores, auditoría de
 producción, carga sintética, construcción/smoke test del contenedor y validación
@@ -45,6 +51,13 @@ movimientos del usuario autenticado, impide inyección de UID y valida el límit
 Prueba reglas que rechazan lecturas/escrituras ajenas y anónimas y permiten
 colecciones legítimas del TP2, incluidos aportes a metas. Después deshabilita al
 usuario y comprueba el rechazo. Elimina los fixtures de los emuladores al finalizar.
+
+El adaptador REST repite el resumen contra Firestore con el ID token del usuario,
+sin ADC, y comprueba el rechazo de la cuenta deshabilitada. Los fixtures locales
+incluyen email/contraseña sintéticos, para que Auth mantenga el estado de
+revocación. Pruebas unitarias adicionales cubren estado ausente, `validSince`,
+credenciales por solicitud, consultas y respuestas acotadas. Ambos adaptadores
+rechazan tokens sin firma/de proyecto ajeno y emuladores en servicios desplegados.
 
 Los tokens del emulador no demuestran validación criptográfica de un ID token
 real. La firma de producción queda a cargo del SDK oficial; la prueba de emisión
@@ -89,7 +102,8 @@ Se inspeccionaron en consola ubicación/modalidad de Firestore, vinculación de
 facturación y lista de APIs. Firestore es regional en Santiago; no hay facturación
 vinculada. Se compararon las reglas publicadas, índices y roles existentes.
 Siguen pendientes permisos específicos del nuevo runtime, presupuesto y política
-organizacional. El
+organizacional. La variante elegida ahora es Azure para Estudiantes; los archivos
+Cloud Run se conservan como alternativa. El
 contenedor debe construirse y revisarse antes del despliegue; la imagen base
 todavía usa la etiqueta oficial Node 22 y se recomienda fijar su digest tras
 esa revisión. El máximo de instancias y el timeout de Cloud Run no son topes

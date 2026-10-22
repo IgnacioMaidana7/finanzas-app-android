@@ -6,8 +6,9 @@ import { MAX_TRANSACTIONS } from './summary.mjs';
 export function firebaseDependencies(projectId) {
   if (!projectId) throw new Error('FIREBASE_PROJECT_ID is required');
   // Cloud Run must never accept unsigned emulator tokens.
-  if (process.env.K_SERVICE && (process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.FIRESTORE_EMULATOR_HOST)) {
-    throw new Error('Emulators are forbidden on Cloud Run');
+  if ((process.env.K_SERVICE || process.env.CONTAINER_APP_NAME) &&
+      (process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.FIRESTORE_EMULATOR_HOST)) {
+    throw new Error('Emulators are forbidden on deployed services');
   }
   const app = initializeApp({ projectId, credential: applicationDefault() });
   const auth = getAuth(app);

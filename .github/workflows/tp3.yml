@@ -37,6 +37,13 @@ jobs:
           curl --fail --retry 10 --retry-all-errors --retry-delay 1 --max-time 2 http://127.0.0.1:8080/healthz
           status=$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8080/v1/summary?month=2026-10')
           test "$status" = 401
+      - name: Azure container smoke test without administrative credentials
+        run: |
+          docker run --detach --rm --name tp3-summary-azure --publish 127.0.0.1:8081:8080 --env FIREBASE_PROJECT_ID=demo-finanzas-tp3 --env FIREBASE_DATA_ACCESS=user-rest --env FIREBASE_WEB_API_KEY=synthetic-client-key --env CONTAINER_APP_NAME=ci tp3-summary:test
+          trap 'docker logs tp3-summary-azure; docker stop tp3-summary-azure' EXIT
+          curl --fail --retry 10 --retry-all-errors --retry-delay 1 --max-time 2 http://127.0.0.1:8081/healthz
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8081/v1/summary?month=2026-10')
+          test "$status" = 401
       - uses: actions/upload-artifact@v4
         with:
           name: tp3-local-synthetic-load
@@ -53,3 +60,7 @@ jobs:
       - run: terraform -chdir=infra init -backend=false
       - run: terraform -chdir=infra validate
       - run: terraform -chdir=infra test
+      - run: terraform -chdir=infra/azure fmt -check -recursive
+      - run: terraform -chdir=infra/azure init -backend=false
+      - run: terraform -chdir=infra/azure validate
+      - run: terraform -chdir=infra/azure test

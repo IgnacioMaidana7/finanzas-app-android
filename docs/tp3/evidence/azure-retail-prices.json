@@ -1,0 +1,52 @@
+{
+  "observedAtUtc": "2026-10-22T23:46:36.2867551Z",
+  "sources": [
+    "https://prices.azure.com/api/retail/prices?$filter=serviceName%20eq%20%27Azure%20Container%20Apps%27%20and%20armRegionName%20eq%20%27chilecentral%27%20and%20priceType%20eq%20%27Consumption%27",
+    "https://prices.azure.com/api/retail/prices?$filter=serviceName%20eq%20%27Container%20Registry%27%20and%20armRegionName%20eq%20%27chilecentral%27"
+  ],
+  "region": "chilecentral",
+  "currency": "USD",
+  "rates": [
+    {
+      "productName": "Azure Container Apps",
+      "skuName": "Standard",
+      "meterName": "Standard vCPU Active Usage",
+      "retailPrice": 3.4E-05,
+      "unitOfMeasure": "1 Second",
+      "effectiveStartDate": "2026-01-01T00:00:00Z"
+    },
+    {
+      "productName": "Azure Container Apps",
+      "skuName": "Standard",
+      "meterName": "Standard Requests",
+      "retailPrice": 0.4,
+      "unitOfMeasure": "1M",
+      "effectiveStartDate": "2026-01-01T00:00:00Z"
+    },
+    {
+      "productName": "Azure Container Apps",
+      "skuName": "Standard",
+      "meterName": "Standard Memory Active Usage",
+      "retailPrice": 4E-06,
+      "unitOfMeasure": "1 GiB Second",
+      "effectiveStartDate": "2026-01-01T00:00:00Z"
+    },
+    {
+      "productName": "Container Registry",
+      "skuName": "Basic",
+      "meterName": "Basic Registry Unit",
+      "retailPrice": 0.1666,
+      "unitOfMeasure": "1/Day",
+      "effectiveStartDate": "2025-04-01T00:00:00Z"
+    },
+    {
+      "productName": "Container Registry",
+      "skuName": "Basic",
+      "meterName": "Task vCPU Duration",
+      "retailPrice": 0.0001,
+      "unitOfMeasure": "1 Second",
+      "effectiveStartDate": "2025-04-01T00:00:00Z"
+    }
+  ],
+  "note": "Public retail rates; not an account bill or a deployed service. Free allocations and other costs excluded from scenario."
+}
