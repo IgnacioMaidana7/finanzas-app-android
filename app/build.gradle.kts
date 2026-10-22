@@ -17,6 +17,12 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val summaryUrl = providers.gradleProperty("SUMMARY_BASE_URL").orElse("").get()
+        require(summaryUrl.isEmpty() || Regex("https://[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.run\\.app").matches(summaryUrl)) {
+            "SUMMARY_BASE_URL debe ser el origen HTTPS de Cloud Run, sin ruta ni barra final."
+        }
+        buildConfigField("String", "SUMMARY_BASE_URL", "\"$summaryUrl\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -33,6 +39,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

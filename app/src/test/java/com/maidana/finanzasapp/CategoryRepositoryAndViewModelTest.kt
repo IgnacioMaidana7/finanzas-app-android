@@ -421,7 +421,9 @@ class CategoryRepositoryAndViewModelTest {
             type = TransactionType.GASTO,
             category = "Mascotas",
             categoryId = catId,
-            date = System.currentTimeMillis()
+            date = java.util.Calendar.getInstance().apply {
+                set(2026, java.util.Calendar.SEPTEMBER, 15, 12, 0, 0)
+            }.timeInMillis
         )
         fakeRepository.transactionsMap.getOrPut("user_A") { mutableListOf() }.add(initialTx)
 
@@ -487,7 +489,9 @@ class CategoryRepositoryAndViewModelTest {
             type = TransactionType.GASTO,
             category = "Mascotas",
             categoryId = catId,
-            date = System.currentTimeMillis()
+            date = java.util.Calendar.getInstance().apply {
+                set(2026, java.util.Calendar.SEPTEMBER, 15, 12, 0, 0)
+            }.timeInMillis
         )
 
         val budget = Budget(

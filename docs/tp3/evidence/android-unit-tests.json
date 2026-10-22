@@ -1,0 +1,86 @@
+[
+  {
+    "suite": "com.maidana.finanzasapp.AccountRepositoryAndBalanceCalculationTest",
+    "tests": 14,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.AuthValidationTest",
+    "tests": 17,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.BudgetsViewModelTest",
+    "tests": 12,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.CategoryConstantsTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.CategoryRepositoryAndViewModelTest",
+    "tests": 17,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.CloudSummaryViewModelTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.DashboardViewModelTest",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.EndToEndCompleteFlowAuditTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.ExampleUnitTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.GoalsViewModelTest",
+    "tests": 15,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.StatisticsViewModelTest",
+    "tests": 28,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.ThousandsSeparatorVisualTransformationTest",
+    "tests": 11,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.TransactionsViewModelTest",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0
+  },
+  {
+    "suite": "com.maidana.finanzasapp.UserGreetingTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  }
+]

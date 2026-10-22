@@ -1,0 +1,55 @@
+name: TP3 backend and infrastructure
+on:
+  push:
+    branches: [tp3/cloud-run-financial-summary]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npx firebase emulators:exec --config ../firebase.json --project demo-finanzas-tp3 --only auth,firestore "npm run test:emulator"
+      - run: npm run load:local
+      - run: docker build -t tp3-summary:test .
+      - name: Container smoke test
+        run: |
+          docker run --detach --rm --name tp3-summary --publish 127.0.0.1:8080:8080 --env FIREBASE_PROJECT_ID=demo-finanzas-tp3 --env K_SERVICE=ci tp3-summary:test
+          trap 'docker stop tp3-summary' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:8080/healthz
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8080/v1/summary?month=2026-10')
+          test "$status" = 401
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tp3-local-synthetic-load
+          path: docs/tp3/evidence/load-local.json
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.14.3'
+      - run: terraform -chdir=infra fmt -check
+      - run: terraform -chdir=infra init -backend=false
+      - run: terraform -chdir=infra validate
+      - run: terraform -chdir=infra test

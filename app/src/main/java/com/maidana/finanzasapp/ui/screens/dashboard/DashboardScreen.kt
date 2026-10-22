@@ -197,6 +197,10 @@ fun DashboardScreen(
             onEditInitialBalances = { showInitialBalanceDialog = true }
         )
 
+        if (com.maidana.finanzasapp.BuildConfig.SUMMARY_BASE_URL.isNotBlank()) {
+            CloudSummaryCard()
+        }
+
         // Tarjetas de Métricas Rápidas
         Row(
             modifier = Modifier.fillMaxWidth(),
