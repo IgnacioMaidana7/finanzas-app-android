@@ -1,0 +1,13 @@
+{
+  "observedAtUtc": "2026-10-23T00:23:34.5125049Z",
+  "sourceCommit": "123f40775440b7c369983f6ef9f8b49e2cca27c1",
+  "workflow": "https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/39877268933",
+  "artifactId": 12469380569,
+  "artifactZipSha256": "0da4790d2fcc60b5f2c479791434694b6f0ebbea148aae45c47b469f86efb2d5",
+  "dockerArchiveSha256": "ae51f4a65845de173c739f1a3c32461b2f625c7d4f2fb2b11ce6b1df2c04cd0d",
+  "image": "tp3finanzas20261022c7a9br.azurecr.io/summary@sha256:a7302da32c161d99ad370647ee03e201d326781d58e3131feacbf22253bcd9d8",
+  "baseImage": "node:22-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d",
+  "verifiedArchiveHashes": true,
+  "temporaryRegistryCredentialRemoved": true,
+  "azureCredentialsInGithub": false
+}

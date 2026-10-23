@@ -1,0 +1,6 @@
+{
+  "observedAtUtc": "2026-10-23T00:23:34.5318705Z",
+  "status": "CostManagement query not supported for this student offer",
+  "actualAccruedCostUsd": null,
+  "note": "Use Education remaining-credit and cost views. No zero-cost assertion; reporting can be delayed."
+}

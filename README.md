@@ -12,11 +12,23 @@ resumen mensual autenticado, sin cambiar las operaciones existentes del TP2.
 
 [Estado de validación](docs/tp3/validacion.md) · [Backend y contrato HTTP](backend/README.md).
 
-**Estado:** código y configuración probados localmente; beneficio Azure para
-Estudiantes activo (USD 100, consumo observado USD 0). El despliegue y el uso de
-crédito requieren aprobación. Las pruebas locales no demuestran autoescalado real.
+**Estado:** API desplegada en Azure para Estudiantes con aprobación de consumo
+del crédito (presupuesto de control USD 5, ventana de demostración de 24 h).
+Se verificaron 1.000 consultas sintéticas sin errores, aislamiento y revocación,
+y se observó crecimiento automático de una a dos réplicas. APK debug compilado
+con la URL real; la interacción en un teléfono queda para verificación manual.
 La [variante Cloud Run](docs/tp3/02-configuracion-cloud.md) se conserva como
 alternativa; Google Cloud no tiene facturación vinculada.
+
+Servicio: `https://ca-tp3-finanzas-summary.icybay-96cbe924.chilecentral.azurecontainerapps.io`.
+`/healthz` es público; el resumen requiere sesión Firebase. Los usuarios y
+movimientos sintéticos se eliminaron al terminar la prueba.
+
+El retiro de los recursos Azure está programado para el **23/10/2026 a las 21:55
+(Buenos Aires)**, aproximadamente 24 horas después de la aprobación. La tarea
+local necesita la computadora encendida, Codex abierto y la sesión Azure vigente.
+Al ejecutarse, la API dejará de responder; Firebase y estos entregables se conservan.
+Ver [programación y alcance](docs/tp3/evidence/azure-demo-window.json).
 
 ## Android
 

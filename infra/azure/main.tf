@@ -109,6 +109,15 @@ resource "azurerm_container_app" "summary" {
     }
   }
   lifecycle {
+    # Express omits these platform-managed defaults in GET responses. Single
+    # revision routing remains enforced; HTTPS, image, auth and scale limits
+    # are deliberately NOT ignored.
+    ignore_changes = [
+      ingress[0].traffic_weight,
+      template[0].cooldown_period_in_seconds,
+      template[0].polling_interval_in_seconds,
+      template[0].container[0].readiness_probe[0].transport,
+    ]
     precondition {
       condition     = var.firebase_client_api_key != ""
       error_message = "Se necesita la clave cliente de Firebase para verificar sesiones; no usar claves administrativas."

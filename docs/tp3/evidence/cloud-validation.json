@@ -1,0 +1,31 @@
+{
+  "environment": "azure-real-synthetic-only",
+  "createdAt": "2026-10-23T00:26:45.350Z",
+  "month": "2026-10",
+  "realFinancialDataAccessed": false,
+  "serviceOrigin": "https://ca-tp3-finanzas-summary.icybay-96cbe924.chilecentral.azurecontainerapps.io",
+  "checks": {
+    "health": 200,
+    "unauthenticated": 401,
+    "authenticatedSummary": 200,
+    "otherUserSeesEmptyMonth": true,
+    "uidInjection": 400,
+    "firestoreCrossUser": 403,
+    "revokedSession": 401,
+    "freshSession": 200
+  },
+  "cleanup": true,
+  "load": {
+    "requests": 1000,
+    "maxConcurrency": 32,
+    "scheduledRequestsPerSecond": 25,
+    "syntheticDocumentsPerSummary": 10,
+    "errors": 0,
+    "elapsedMs": 40721,
+    "p50Ms": 753,
+    "p95Ms": 883,
+    "p99Ms": 1258,
+    "provesAutoscalingByItself": false
+  },
+  "cleanupErrors": 0
+}

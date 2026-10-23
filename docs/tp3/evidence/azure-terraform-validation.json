@@ -1,0 +1,14 @@
+{
+  "observedAtUtc": "2026-10-23T00:49:14.8130368Z",
+  "realProvider": "azurerm 4.81.0",
+  "terraform": "1.14.3",
+  "planExitCode": 0,
+  "result": "No changes; deployed resources match Terraform configuration",
+  "expressReadbackOmissionsIgnored": [
+    "single-revision traffic weights",
+    "platform cooldown and polling defaults",
+    "implicit HTTP probe scheme"
+  ],
+  "securityAndScaleBoundsStillManaged": true,
+  "containsCredentials": false
+}

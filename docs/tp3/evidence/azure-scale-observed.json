@@ -1,0 +1,236 @@
+{
+  "source": "Azure Container Apps replica API",
+  "samples": [
+    {
+      "atUtc": "2026-10-23T00:26:51.3857759Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:27:02.0650393Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:27:12.8231030Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:27:23.0126218Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:27:33.1339205Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:27:42.6681406Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:27:52.6742653Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:28:02.9153987Z",
+      "replicas": 2,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:28:15.4242438Z",
+      "replicas": 2,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-10-23T00:28:26.0282754Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:28:36.6014380Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:28:46.9039386Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:28:58.6218643Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:29:09.3237662Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:29:21.3888333Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:29:32.3979032Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:29:44.0513667Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:29:54.4594771Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:30:04.2363833Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:30:14.7486953Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:30:24.4093928Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:30:34.5048181Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:30:44.0834293Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:30:53.7134106Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:31:03.6218318Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:31:14.4375034Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:31:24.9306114Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:31:34.8466503Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:31:44.6150466Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:31:54.3133378Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:32:06.0948248Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:32:15.8518031Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:32:25.7425064Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:32:35.4144333Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:32:46.9680537Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:32:56.7018830Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:33:07.2365864Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:33:17.5676261Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-10-23T00:33:28.0827631Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:33:38.8113001Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:33:50.5636610Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:34:01.8746015Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:34:12.8635107Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:34:22.8376590Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:34:33.1050204Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-10-23T00:34:43.0093217Z",
+      "replicas": 0,
+      "ready": 0
+    }
+  ],
+  "includesPersonalData": false
+}

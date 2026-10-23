@@ -7,6 +7,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 S = 2
 AZURE = '--azure' in sys.argv
+DEPLOYED = AZURE and '--deployed' in sys.argv
 im = Image.new('RGB', (1600*S, 1040*S), '#f5f7fb')
 d = ImageDraw.Draw(im)
 FONT = Path('C:/Windows/Fonts/segoeui.ttf')
@@ -31,9 +32,9 @@ def arrow(points, color='#536680', width=3):
                (x-length*math.cos(angle+.45), y-length*math.sin(angle+.45))], fill=color)
 
 text(65, 35, 'Finanzas App · Arquitectura de escalabilidad', 39, bold=True)
-text(65, 91, 'TP3 · Arquitectura objetivo · 22 de octubre de 2026', 24)
-box((1090, 45, 1535, 110), fill='#fff0cc', outline='#dbb76c')
-text(1110, 62, 'Azure: despliegue pendiente' if AZURE else 'Cloud Run: despliegue pendiente', 23, bold=True)
+text(65, 91, 'TP3 · Arquitectura desplegada · 22 de octubre de 2026' if DEPLOYED else 'TP3 · Arquitectura objetivo · 22 de octubre de 2026', 24)
+box((1090, 45, 1535, 110), fill='#e8f4ed' if DEPLOYED else '#fff0cc', outline='#77ab8e' if DEPLOYED else '#dbb76c')
+text(1110, 62, 'Azure: desplegado y verificado' if DEPLOYED else 'Azure: despliegue pendiente' if AZURE else 'Cloud Run: despliegue pendiente', 23, bold=True)
 
 box((440, 205, 1110, 850), fill='#eaf2ff', outline='#7597ce', radius=24)
 text(470, 222, 'Azure Container Apps · Chile Central' if AZURE else 'Cloud Run propuesto · Santiago', 26, bold=True)
@@ -85,7 +86,7 @@ arrow([(1060,720),(1133,720),(1133,735),(1180,735)], '#3a865a')
 text(1115, 765, 'ID token' if AZURE else 'ADC + IAM', 18, color='#3a865a')
 arrow([(1360,760),(1360,910),(217,910),(217,555)], '#3a865a')
 text(500, 922, 'Acceso directo TP2 · Security Rules · sólo datos del propietario', 24, color='#326d4b')
-text(65, 982, 'ACR privado + identidad AcrPull · Terraform · balanceo y escalado reales pendientes' if AZURE else 'Terraform + imagen por digest · pruebas locales sintéticas · no hay evidencia cloud todavía', 23)
+text(65, 982, 'ACR privado Brazil South · identidad AcrPull · Terraform · 1 → 2 réplicas observadas' if DEPLOYED else 'ACR privado + identidad AcrPull · Terraform · balanceo y escalado reales pendientes' if AZURE else 'Terraform + imagen por digest · pruebas locales sintéticas · no hay evidencia cloud todavía', 23)
 
 target = ROOT / ('docs/tp3/azure/arquitectura.png' if AZURE else 'docs/tp3/arquitectura.png')
 im.save(target)

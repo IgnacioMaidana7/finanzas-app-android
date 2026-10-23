@@ -1,5 +1,5 @@
 // Explicitly opt in only after approving cloud usage. Never runs in normal tests/CI.
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, unlink } from 'node:fs/promises';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import assert from 'node:assert/strict';
@@ -20,6 +20,7 @@ const accounts = [];
 const evidence = { environment: 'azure-real-synthetic-only', createdAt: new Date().toISOString(),
   month, realFinancialDataAccessed: false, serviceOrigin: origin.origin, checks: {}, cleanup: false };
 const output = new URL('../../docs/tp3/evidence/cloud-validation.json', import.meta.url);
+const recovery = new URL('../../docs/tp3/evidence/cloud-fixtures.local.json', import.meta.url);
 
 async function request(url, options = {}) {
   return fetch(url, { redirect: 'error', signal: AbortSignal.timeout(30000), ...options });
@@ -61,7 +62,7 @@ try {
   const a = await createAccount();
   const b = await createAccount();
   // Recovery metadata only; intentionally gitignored. Never store credentials.
-  await writeFile(new URL('../../docs/tp3/evidence/cloud-fixtures.local.json', import.meta.url),
+  await writeFile(recovery,
     JSON.stringify(accounts.map(({ uid, email }) => ({ uid, email })), null, 2));
   stage = 'synthetic-documents';
   for (let i = 0; i < 10; i++) {
@@ -147,6 +148,7 @@ try {
   }
   evidence.cleanup = cleanupErrors === 0;
   evidence.cleanupErrors = cleanupErrors;
+  if (evidence.cleanup) await unlink(recovery).catch(() => {});
   await writeFile(output, JSON.stringify(evidence, null, 2) + '\n');
   console.log(JSON.stringify(evidence, null, 2));
   if (failed || cleanupErrors) process.exitCode = 1;

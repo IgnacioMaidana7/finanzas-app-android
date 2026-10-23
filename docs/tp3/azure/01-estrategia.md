@@ -1,8 +1,8 @@
 # TP3 · Estrategia de escalabilidad
 
 Fecha: 22/10/2026. Variante elegida: Azure para Estudiantes + Firebase existente.
-Estado: implementación y pruebas locales completas; despliegue pendiente de
-aprobar consumo de crédito. El capítulo 16 del libro no fue proporcionado; este
+Estado: desplegado y probado con datos sintéticos en Azure; aprobación de crédito
+con presupuesto de control USD 5 y ventana de 24 h. El capítulo 16 no fue proporcionado; este
 documento describe decisiones del proyecto y no atribuye contenido al libro.
 
 ## Problema y funcionalidad
@@ -26,7 +26,7 @@ réplicas saludables de una única revisión activa. El proceso es sin estado:
 no almacena sesiones o resultados financieros entre solicitudes. Cada réplica
 puede atender cualquier usuario con el mismo contrato y validación.
 
-Terraform propone perfil **Consumption**, mínimo **0**, máximo **2**, **0,25 vCPU
+Terraform configuró perfil **Consumption**, mínimo **0**, máximo **2**, **0,25 vCPU
 y 0,5 GiB por réplica**, y regla HTTP con umbral **16**. Ese umbral orienta al
 escalador; no impone un máximo de 16 solicitudes simultáneas por proceso. La
 plataforma usa KEDA. [Referencia oficial](https://learn.microsoft.com/azure/container-apps/scale-app).
@@ -64,9 +64,10 @@ de 8 s por llamada. No se registra token, UID ni importes; respuestas `no-store`
    abuso, copias/restauración ensayadas y revisión de necesidad de zonas/regiones.
    Ajustar mínimos/máximos sólo con presupuesto y mediciones aprobados.
 
-La carga local es sintética y no demuestra autoescalado. El ensayo cloud propuesto
-se limita a 1.000 consultas de un usuario de prueba con hasta 10 movimientos, sin
+La carga local es sintética y no demuestra autoescalado. El ensayo cloud ejecutado
+se limitó a 1.000 consultas de un usuario de prueba con 10 movimientos, sin
 importes reales ni tokens en evidencias. Si no aparece una segunda réplica dentro
 del ensayo acotado se documentará ese resultado; no se fabricará evidencia ni se
-ampliará carga automáticamente. El máximo de réplicas y un presupuesto de control
+ampliará carga automáticamente. En esta ejecución se registró el paso de una a
+dos réplicas, ambas listas. El máximo de réplicas y un presupuesto de control
 no constituyen un límite monetario absoluto.

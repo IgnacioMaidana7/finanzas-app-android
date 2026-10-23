@@ -1,0 +1,56 @@
+{
+  "reviewedAtUtc": "2026-10-23T00:57:05.8872711Z",
+  "changes": [
+    {
+      "address": "azurerm_container_app.summary[0]",
+      "action": "delete",
+      "resource": "ca-tp3-finanzas-summary"
+    },
+    {
+      "address": "azurerm_container_app_environment.tp3",
+      "action": "delete",
+      "resource": "cae-tp3-finanzas"
+    },
+    {
+      "address": "azurerm_container_registry.images",
+      "action": "delete",
+      "resource": "tp3finanzas20261022c7a9br"
+    },
+    {
+      "address": "azurerm_resource_group.tp3",
+      "action": "delete",
+      "resource": "rg-tp3-finanzas"
+    },
+    {
+      "address": "azurerm_role_assignment.pull",
+      "action": "delete",
+      "resource": "AcrPull scoped to TP3 registry"
+    },
+    {
+      "address": "azurerm_user_assigned_identity.runtime",
+      "action": "delete",
+      "resource": "id-tp3-summary"
+    }
+  ],
+  "inventory": [
+    {
+      "name": "cae-tp3-finanzas",
+      "type": "Microsoft.App/managedEnvironments"
+    },
+    {
+      "name": "id-tp3-summary",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+    },
+    {
+      "name": "tp3finanzas20261022c7a9br",
+      "type": "Microsoft.ContainerRegistry/registries"
+    },
+    {
+      "name": "ca-tp3-finanzas-summary",
+      "type": "Microsoft.App/containerApps"
+    }
+  ],
+  "applied": false,
+  "firebaseIncluded": false,
+  "requiresFreshReviewAtExecution": true
+}

@@ -95,5 +95,6 @@ aislado `demo-finanzas-tp3` y puertos locales exactos de la suite.
 Las pruebas no usan el proyecto real. Ver el [procedimiento Azure](../docs/tp3/azure/02-configuracion-cloud.md)
 y la [alternativa Cloud Run](../docs/tp3/02-configuracion-cloud.md).
 El Dockerfile sólo copia dependencias de producción y `src/`; no incluye pruebas,
-configuración Firebase Android ni archivos personales. Fijar también el digest
-de la imagen base tras la revisión de vulnerabilidades previa al despliegue.
+configuración Firebase Android ni archivos personales. La imagen base Node está
+fijada por digest. La auditoría npm de producción pasó; queda pendiente un análisis
+completo de vulnerabilidades del sistema operativo de la imagen.

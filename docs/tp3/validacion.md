@@ -15,15 +15,17 @@ existente, SDK Android 37. No se usaron cuentas ni movimientos reales en pruebas
 | Terraform formato/validación | Correctos para Google y Azure (azurerm 4.81.0), Terraform 1.14.3 |
 | Terraform pruebas con proveedor simulado | **4 pruebas, 0 fallos** (2 por variante); no usan cuenta cloud |
 | Carga HTTP local | **400 solicitudes, concurrencia 16, 0 errores** |
-| Cloud Run desplegado / carga cloud | **Pendiente** |
-| Azure Container Apps desplegado / carga cloud | **Pendiente de aprobación de consumo de crédito** |
-| Flujo Android contra backend real | **Pendiente** |
+| Cloud Run desplegado / carga cloud | **Alternativa no desplegada; se eligió Azure** |
+| Azure Container Apps desplegado / carga cloud | **Correcto: 1.000 consultas sintéticas, 0 errores; p95 883 ms** |
+| Autoescalado real Azure | **46 muestras: 1 → 2 réplicas (ambas listas) → 0 al quedar sin tráfico** |
+| Android con backend real | **APK debug compilado con URL real; interacción manual en teléfono pendiente** |
 | Imagen Docker ejecutada localmente | **No realizada:** Docker no está disponible en este equipo |
 
 La compilación, pruebas Android y lint se repitieron con un origen HTTPS
 `azurecontainerapps.io` de prueba tras ampliar la validación de URL. No se
-contactó ese origen. El beneficio Azure para Estudiantes está activo, con USD 100
-y consumo observado USD 0; [revisión y costos](azure/02-configuracion-cloud.md).
+contactó ese origen. La revisión inicial del beneficio Azure para Estudiantes
+mostró USD 100 y consumo USD 0 antes de desplegar; no es el costo final.
+Ver [revisión y costos](azure/02-configuracion-cloud.md).
 
 El workflow de GitHub automatiza pruebas del backend, emuladores, auditoría de
 producción, carga sintética, construcción/smoke test del contenedor y validación
@@ -39,6 +41,26 @@ La [ejecución de la adaptación Azure, commit a8fa4f7](https://github.com/Ignac
 también terminó correctamente: backend de 19 pruebas, integración de ambos
 adaptadores, carga, auditoría, imagen Docker, smoke tests Admin y REST sin ADC,
 y validación/pruebas de las dos variantes Terraform.
+
+**Despliegue y verificación reales:** se aplicó Terraform en Azure para Estudiantes
+con aprobación explícita del presupuesto de control USD 5 durante 24 h. El
+[workflow 123f407](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/39877268933)
+pasó todas las verificaciones y produjo la imagen transferida al registro privado.
+Se comprobaron hashes, digest y retiro de la credencial temporal del registro.
+ACR Tasks rechazó la oferta estudiantil; no se entregaron credenciales Azure a CI.
+
+La [prueba cloud](evidence/cloud-validation.json) verificó health 200, resumen
+autenticado 200, falta de sesión y sesión revocada 401, inyección de UID 400 y
+lectura cruzada Firestore 403. Usó dos cuentas nuevas y diez documentos sintéticos,
+eliminados al finalizar, sin leer datos financieros reales. Ejecutó 1.000 resúmenes
+con hasta 32 solicitudes en vuelo y planificación de 25/s: cero errores, p50
+753 ms, p95 883 ms y p99 1.258 ms. No son un SLA ni una prueba de capacidad máxima.
+
+Las [muestras de réplicas](evidence/azure-scale-observed.json) provienen de la API
+Azure y muestran crecimiento de una a dos instancias, ambas listas, y posterior
+reducción a cero. El [gráfico](azure/autoescalado-observado.png) conserva los puntos
+medidos. No permite atribuir cada solicitud a una réplica. La consulta inicial de
+métricas `Requests` no devolvió series; no se interpreta como ausencia de tráfico.
 
 ## Qué verifican las pruebas
 
@@ -65,8 +87,9 @@ credenciales por solicitud, consultas y respuestas acotadas. Ambos adaptadores
 rechazan tokens sin firma/de proyecto ajeno y emuladores en servicios desplegados.
 
 Los tokens del emulador no demuestran validación criptográfica de un ID token
-real. La firma de producción queda a cargo del SDK oficial; la prueba de emisión
-y uso de tokens reales sigue pendiente del proyecto de prueba cloud.
+real. La firma de producción queda a cargo del SDK oficial. La prueba cloud
+posterior sí emitió tokens reales para las dos cuentas sintéticas nuevas y
+verificó su uso y revocación contra el servicio desplegado.
 
 Las tres pruebas nuevas de Android verifican cancelación/limpieza del resultado
 al cambiar de usuario, cierre de sesión, cambio de mes y recuperación por reintento.
@@ -106,16 +129,24 @@ Evidencias: [auditoría completa](evidence/dependency-audit.json),
 Se inspeccionaron en consola ubicación/modalidad de Firestore, vinculación de
 facturación y lista de APIs. Firestore es regional en Santiago; no hay facturación
 vinculada. Se compararon las reglas publicadas, índices y roles existentes.
-Siguen pendientes permisos específicos del nuevo runtime, presupuesto y política
-organizacional. La variante elegida ahora es Azure para Estudiantes; los archivos
-Cloud Run se conservan como alternativa. El
-contenedor debe construirse y revisarse antes del despliegue; la imagen base
-todavía usa la etiqueta oficial Node 22 y se recomienda fijar su digest tras
-esa revisión. El máximo de instancias y el timeout de Cloud Run no son topes
-absolutos de gasto; el timeout tampoco garantiza cancelar una consulta ya
-iniciada al proveedor. No hay limitador distribuido por usuario ni protección
+La variante elegida es Azure para Estudiantes; se revisaron rol de propietario,
+límite de gasto activado, política de regiones y cuotas. El runtime tiene sólo
+`AcrPull` sobre el registro. Los archivos Cloud Run se conservan como alternativa.
+La base Node y la imagen desplegada están fijadas por digest; la auditoría npm
+no equivale a una auditoría completa del sistema operativo. Los máximos de
+réplicas y tiempos de espera no son topes absolutos de gasto ni garantizan
+cancelar una consulta ya iniciada al proveedor. No hay limitador distribuido por usuario ni protección
 dedicada contra abuso en este TP. Ver las etapas de crecimiento en la estrategia.
 
 La lectura del capítulo 16 y la discusión del grupo no se simularon. Las
-capturas y métricas cloud deben agregarse después del acceso autorizado. No
-presentar configuraciones propuestas o resultados locales como recursos reales.
+capturas, configuración efectiva y observaciones cloud se agregaron después de
+la autorización. Cost Management no admitió la oferta para consultar el gasto
+acumulado: revisar Education, considerando la demora de publicación de consumo.
+La interacción completa en un teléfono sigue pendiente; la API y el APK compilado
+no se presentan como una prueba manual del flujo móvil.
+
+El retiro Azure está programado para el 23/10/2026 a las 21:55 de Buenos Aires.
+Se revisó un plan con seis eliminaciones, sin aplicarlo. La tarea local requiere
+equipo encendido, Codex abierto y autenticación vigente. Ver
+[programación](evidence/azure-demo-window.json) y
+[alcance revisado](evidence/azure-retirement-plan-review.json).
