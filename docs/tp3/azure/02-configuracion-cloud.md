@@ -56,6 +56,14 @@ Se verificaron las mismas tarifas Basic y Tasks en
 El reemplazo del registro vacío inicial puede agregar consumo parcial del registro;
 el presupuesto de control contempla estos reintentos.
 
+ACR Tasks también devolvió `TasksOperationsNotAllowed` para la oferta estudiantil
+en Brazil South. Se usa la imagen construida y probada en GitHub Actions, exportada
+como artefacto privado de un día. Se verifica SHA-256 al descargarla y se sube con
+`crane` y un token temporal obtenido mediante la sesión local de Azure CLI.
+No se entregan credenciales Azure a GitHub ni se crea otra identidad con escritura.
+El token local se retira del almacén de `crane` al terminar. Los intentos de Tasks
+fueron rechazados antes de iniciar una ejecución de construcción.
+
 | Concepto | Tarifa observada | Escenario de demostración |
 |---|---:|---:|
 | CPU activa | 0,000034 por vCPU-s | Dos réplicas de 0,25 vCPU durante 1 h: USD 0,0612 |
@@ -88,8 +96,10 @@ obligan a cambiar estos recursos, revisar antes de crear una alternativa.
 3. Ejecutar `init`, `validate` y `plan` con `deploy_app=false`; revisar que incluya
    exclusivamente el grupo, registro, identidad, rol y entorno previstos.
    Aplicar sólo ese plan revisado.
-4. Construir `backend/` en ACR Tasks; revisar vulnerabilidades y fijar digest de
-   imagen final y base Node. No publicar código privado en un registro público.
+4. Construir y probar `backend/` en GitHub Actions; verificar el hash del artefacto
+   privado y transferirlo al registro con la sesión local. La base Node está
+   fijada por digest; revisar auditoría de producción y digest final. No publicar
+   código privado ni credenciales Azure en un registro o artefacto público.
 5. Cargar la clave cliente Firebase desde configuración Android existente sin
    imprimirla; ejecutar nuevo plan con `deploy_app=true` e imagen por digest.
    Aplicar después de revisar diferencias. Las dos fases evitan depender de una
