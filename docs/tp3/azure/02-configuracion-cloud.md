@@ -25,7 +25,7 @@ a pago por uso. No se propone ese cambio. [Condiciones operativas oficiales](htt
 | Recurso | Configuración propuesta |
 |---|---|
 | Grupo `rg-tp3-finanzas` | Agrupa exclusivamente recursos TP3, etiquetas de finalidad |
-| Registro de contenedores | Basic privado, nombre único, administrador desactivado |
+| Registro de contenedores | Basic privado en Brazil South, nombre único, administrador desactivado; ACR Tasks no disponible en Chile Central |
 | Identidad `id-tp3-summary` | Sólo `AcrPull` sobre ese registro |
 | Entorno `cae-tp3-finanzas` | Perfil Consumption, sin perfiles Dedicated, VNet, Private Endpoint ni workspace Log Analytics nuevo |
 | App `ca-tp3-finanzas-summary` | Imagen privada por digest, revisión única, HTTPS público, puerto interno 8080 |
@@ -34,9 +34,9 @@ a pago por uso. No se propone ese cambio. [Condiciones operativas oficiales](htt
 
 La entrada pública es necesaria para Android. `/healthz` no divulga datos y el
 resumen requiere un ID token válido. No se abre Firestore ni se cambian sus reglas.
-`azure-monitor` selecciona el destino de logs del entorno pero no crea una
-configuración diagnóstica ni almacén de logs por sí solo. Capturar métricas de
-plataforma; cualquier retención adicional debe presupuestarse aparte.
+La suscripción aprovisiona entornos Express y rechazó el destino `azure-monitor`.
+Se omite `logs_destination`: sólo streaming, sin almacén ni retención adicional.
+Capturar métricas de plataforma; cualquier retención debe presupuestarse aparte.
 
 No se usan claves de cuenta de servicio Google ni contraseñas ACR. El estado de
 Terraform, ID de suscripción y variables cliente se mantienen locales y fuera de
@@ -49,6 +49,12 @@ Si impiden el uso, detenerse y revisar sin eliminar protecciones automáticament
 Precios públicos consultados para Chile Central en USD, 22/10/2026, conservados en
 [`azure-retail-prices.json`](../evidence/azure-retail-prices.json).
 Son tarifas de referencia; no son una factura de esta cuenta.
+
+El registro se ubica en Brazil South porque ACR Tasks rechazó Chile Central.
+Se verificaron las mismas tarifas Basic y Tasks en
+[`azure-registry-brazil-prices.json`](../evidence/azure-registry-brazil-prices.json).
+El reemplazo del registro vacío inicial puede agregar consumo parcial del registro;
+el presupuesto de control contempla estos reintentos.
 
 | Concepto | Tarifa observada | Escenario de demostración |
 |---|---:|---:|

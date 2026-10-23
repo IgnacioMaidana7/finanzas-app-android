@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "tp3" {
 resource "azurerm_container_registry" "images" {
   name                = var.registry_name
   resource_group_name = azurerm_resource_group.tp3.name
-  location            = var.location
+  location            = var.registry_location
   sku                 = "Basic"
   admin_enabled       = false
   tags                = local.tags
@@ -40,7 +40,6 @@ resource "azurerm_container_app_environment" "tp3" {
   name                = "cae-tp3-finanzas"
   resource_group_name = azurerm_resource_group.tp3.name
   location            = var.location
-  logs_destination    = "azure-monitor"
   workload_profile {
     name                  = "Consumption"
     workload_profile_type = "Consumption"

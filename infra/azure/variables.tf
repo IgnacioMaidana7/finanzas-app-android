@@ -17,6 +17,12 @@ variable "registry_name" {
   }
 }
 
+variable "registry_location" {
+  type        = string
+  default     = "brazilsouth"
+  description = "ACR Tasks no está disponible en Chile Central; registro Basic en Brazil South con la misma tarifa revisada."
+}
+
 variable "firebase_project_id" {
   type    = string
   default = "finanzasapp-1f76a"

@@ -1,6 +1,7 @@
 subscription_id = "REPLACE_WITH_STUDENT_SUBSCRIPTION_ID"
 location        = "chilecentral"
-registry_name   = "tp3finanzasREPLACE"
+registry_name   = "tp3finanzasejemplo"
+registry_location = "brazilsouth"
 
 approve_credit_usage = false
 deploy_app           = false

@@ -1,0 +1,18 @@
+{
+  "observedAtUtc": "2026-10-23T00:06:39.5134058Z",
+  "source": "https://prices.azure.com/api/retail/prices?$filter=serviceName%20eq%20%27Container%20Registry%27%20and%20armRegionName%20eq%20%27brazilsouth%27",
+  "region": "brazilsouth",
+  "currency": "USD",
+  "rates": [
+    {
+      "meterName": "Task vCPU Duration",
+      "retailPrice": 0.0001,
+      "unitOfMeasure": "1 Second"
+    },
+    {
+      "meterName": "Basic Registry Unit",
+      "retailPrice": 0.1666,
+      "unitOfMeasure": "1/Day"
+    }
+  ]
+}

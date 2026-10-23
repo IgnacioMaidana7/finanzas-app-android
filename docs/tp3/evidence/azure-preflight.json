@@ -1,0 +1,49 @@
+{
+  "observedAtUtc": "2026-10-23T00:04:51.0857872Z",
+  "offer": "Azure for Students",
+  "spendingLimit": "On",
+  "accountRoleObservedInPortal": "Owner",
+  "region": "chilecentral",
+  "allowedRegions": [
+    "brazilsouth",
+    "chilecentral",
+    "northcentralus",
+    "southafricanorth",
+    "canadacentral"
+  ],
+  "quota": [
+    {
+      "current": 0,
+      "limit": 1,
+      "name": "ManagedEnvironmentCount"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "name": "SubscriptionDedicatedNCA100Gpus"
+    },
+    {
+      "current": 0,
+      "limit": 1,
+      "name": "SessionPools"
+    },
+    {
+      "current": 0,
+      "limit": 50,
+      "name": "ExpressEnvironmentCount"
+    },
+    {
+      "current": 0,
+      "limit": 1,
+      "name": "SandboxCores"
+    }
+  ],
+  "approvedControlBudgetUsd": 5,
+  "linkedCreditAvailableAtReviewUsd": 100,
+  "firebaseProbe": {
+    "http": 400,
+    "result": "INVALID_ID_TOKEN",
+    "realUserAccessed": false
+  },
+  "notes": "No payment method or pay-as-you-go upgrade. Only TP3 resource group; no Firebase rule/IAM changes."
+}
