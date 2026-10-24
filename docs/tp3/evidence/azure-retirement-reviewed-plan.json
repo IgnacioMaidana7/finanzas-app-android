@@ -1,0 +1,41 @@
+{
+  "reviewedAtUtc": "2026-10-24T00:59:30.6471299Z",
+  "plannedDeletes": 6,
+  "plannedCreates": 0,
+  "plannedUpdates": 0,
+  "subscriptionConfirmed": true,
+  "exclusiveGroupInventoryConfirmed": true,
+  "registryRoleConfirmed": true,
+  "resources": [
+    {
+      "address": "azurerm_container_app.summary[0]",
+      "name": "ca-tp3-finanzas-summary",
+      "action": "delete"
+    },
+    {
+      "address": "azurerm_container_app_environment.tp3",
+      "name": "cae-tp3-finanzas",
+      "action": "delete"
+    },
+    {
+      "address": "azurerm_container_registry.images",
+      "name": "tp3finanzas20261022c7a9br",
+      "action": "delete"
+    },
+    {
+      "address": "azurerm_resource_group.tp3",
+      "name": "rg-tp3-finanzas",
+      "action": "delete"
+    },
+    {
+      "address": "azurerm_role_assignment.pull",
+      "name": "AcrPull",
+      "action": "delete"
+    },
+    {
+      "address": "azurerm_user_assigned_identity.runtime",
+      "name": "id-tp3-summary",
+      "action": "delete"
+    }
+  ]
+}

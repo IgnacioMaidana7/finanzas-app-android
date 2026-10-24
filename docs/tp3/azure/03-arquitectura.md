@@ -1,6 +1,8 @@
 # TP3 · Arquitectura actualizada
 
-Arquitectura Azure + Firebase desplegada y verificada, 22/10/2026 (Argentina).
+Arquitectura Azure + Firebase desplegada y verificada el 22/10/2026 (Argentina).
+Los recursos Azure se retiraron el 23/10/2026 a las 22:29 de Buenos Aires; el diagrama conserva
+la arquitectura demostrada. Firebase permanece intacto.
 
 ![Diagrama Azure y Firebase](arquitectura.png)
 

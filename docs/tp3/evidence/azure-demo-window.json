@@ -4,8 +4,8 @@
   "offer": "Azure for Students",
   "createdAtUtc": "2026-10-22T21:24:13-03:00",
   "demonstrationEndsAtUtc": "2026-10-23T21:24:13-03:00",
-  "retirementChoice": "User approved one-time retirement in 24 hours",
-  "automatedRetirementScheduled": true,
+  "retirementChoice": "User-approved retirement completed and verified",
+  "automatedRetirementScheduled": false,
   "note": "Budget control is not a hard monetary cutoff. Registry keeps accruing usage even at zero replicas.",
   "retirementAutomationId": "retirar-recursos-azure-del-tp3",
   "scheduledRetirementAtUtc": "2026-10-24T00:55:00Z",
@@ -18,5 +18,7 @@
     "Valid local Azure CLI authentication",
     "Fresh reviewed destruction plan within approved scope"
   ],
-  "retired": false
+  "retired": true,
+  "retiredAtUtc": "2026-10-24T01:29:14.7450636Z",
+  "retirementAutomationStatus": "Deleted after completed one-time retirement"
 }

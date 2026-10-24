@@ -12,8 +12,8 @@ resumen mensual autenticado, sin cambiar las operaciones existentes del TP2.
 
 [Estado de validación](docs/tp3/validacion.md) · [Backend y contrato HTTP](backend/README.md).
 
-**Estado:** API desplegada en Azure para Estudiantes con aprobación de consumo
-del crédito (presupuesto de control USD 5, ventana de demostración de 24 h).
+**Estado:** demostración Azure completada y recursos retirados el 23/10/2026 a las 22:29 de Buenos Aires.
+Se usó el crédito aprobado con presupuesto de control USD 5.
 Se verificaron 1.000 consultas sintéticas sin errores, aislamiento y revocación,
 y se observó crecimiento automático de una a dos réplicas. APK debug compilado
 con la URL real; la interacción en un teléfono queda para verificación manual.
@@ -24,11 +24,11 @@ Servicio: `https://ca-tp3-finanzas-summary.icybay-96cbe924.chilecentral.azurecon
 `/healthz` es público; el resumen requiere sesión Firebase. Los usuarios y
 movimientos sintéticos se eliminaron al terminar la prueba.
 
-El retiro de los recursos Azure está programado para el **23/10/2026 a las 21:55
-(Buenos Aires)**, aproximadamente 24 horas después de la aprobación. La tarea
-local necesita la computadora encendida, Codex abierto y la sesión Azure vigente.
-Al ejecutarse, la API dejará de responder; Firebase y estos entregables se conservan.
-Ver [programación y alcance](docs/tp3/evidence/azure-demo-window.json).
+El retiro autorizado se completó el **23/10/2026 a las 22:29 de Buenos Aires**. Se aplicó un plan nuevo
+con seis eliminaciones y se verificaron el grupo ausente, el estado Terraform vacío
+y la API fuera de servicio. Firebase, código, APK y evidencias se conservan.
+La tarea de retiro se eliminó después de completarse. Ver
+[evidencia de retiro](docs/tp3/evidence/azure-retirement.json).
 
 ## Android
 

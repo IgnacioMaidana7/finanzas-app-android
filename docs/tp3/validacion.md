@@ -145,8 +145,7 @@ acumulado: revisar Education, considerando la demora de publicación de consumo.
 La interacción completa en un teléfono sigue pendiente; la API y el APK compilado
 no se presentan como una prueba manual del flujo móvil.
 
-El retiro Azure está programado para el 23/10/2026 a las 21:55 de Buenos Aires.
-Se revisó un plan con seis eliminaciones, sin aplicarlo. La tarea local requiere
-equipo encendido, Codex abierto y autenticación vigente. Ver
-[programación](evidence/azure-demo-window.json) y
-[alcance revisado](evidence/azure-retirement-plan-review.json).
+El retiro Azure se completó el 23/10/2026 a las 22:29 de Buenos Aires, con seis eliminaciones de un plan
+nuevo revisado. Se verificaron grupo ausente, estado Terraform vacío y API fuera
+de servicio; Firebase y los datos existentes se conservaron. Se eliminó la tarea
+programada. Ver [evidencia del retiro](evidence/azure-retirement.json).

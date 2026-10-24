@@ -14,7 +14,7 @@ en Argentina la ejecución corresponde al 22/10/2026.
 | Firebase | Proyecto `finanzasapp-1f76a`, Spark, sin facturación vinculada |
 | Firestore | Native Standard, regional Santiago `southamerica-west1`; reglas por UID e índices automáticos observados |
 | Regiones efectivas | Servicio en `chilecentral`; registro en `brazilsouth`; ambas permitidas por la política estudiantil |
-| Despliegue y balanceo | API HTTPS activa, revisión única, ingress administrado sobre réplicas saludables |
+| Despliegue y balanceo | API HTTPS activa durante el ensayo, revisión única, ingress administrado sobre réplicas saludables |
 | Autoescalado | Configuración 0–2, umbral HTTP 16; observado 1 → 2 (ambas listas) → 0 sin tráfico |
 | Sesiones y datos | Resumen 200, sin sesión 401, UID inyectado 400, lectura cruzada Firestore 403, sesión revocada 401 |
 | Carga real sintética | 1.000 consultas, 0 errores, p95 883 ms; dos cuentas y sus documentos eliminados |
@@ -143,25 +143,25 @@ acceso a Azure; la evidencia siguiente corresponde al despliegue real.
 
 ## Evidencia real guardada
 
-### Retiro autorizado y programado
+### Retiro completado
 
-El usuario autorizó una única tarea de retiro para el **23/10/2026 a las 21:55
-de Buenos Aires (24/10/2026 00:55 UTC)**, aproximadamente 24 horas después de su
-aprobación final. La ventana original empezó al crear el servicio; la programación
-final extiende su cierre unos 31 minutos. La tarea de Codex debe revisar un plan
-Terraform nuevo y eliminar exclusivamente el grupo del TP3 y sus recursos,
-conservando Firebase, el código, las pruebas y las capturas.
+El retiro autorizado para el 23/10/2026 a las 21:55 se completó el **23/10/2026 a las 22:29 de Buenos Aires**.
+Se confirmó la suscripción prevista, el inventario exclusivo del grupo y el rol
+AcrPull limitado al registro. Se generó y revisó un plan nuevo con seis
+eliminaciones, cero creaciones y cero modificaciones; se aplicó sólo ese plan.
 
-La programación es local: requiere la computadora encendida, Codex abierto y
-autenticación Azure vigente. No es un temporizador de eliminación del servidor
-ni un corte garantizado en USD 5. Si no puede ejecutarse, el registro puede seguir
-consumiendo crédito; se debe retirar cuando se reanude la tarea. La API dejará de
-responder después del retiro. [Registro de programación](../evidence/azure-demo-window.json).
-Se revisó ahora un plan con seis eliminaciones y ningún alta o cambio; no se
-aplicó. La ejecución programada deberá regenerarlo y verificar el inventario:
-[alcance revisado](../evidence/azure-retirement-plan-review.json).
+Se verificaron el grupo ausente, el estado Terraform sin recursos y la API fuera
+de servicio. Firebase, sus usuarios y sus datos no se modificaron. Se conservaron
+el código, las capturas y los resultados de pruebas. La tarea programada se
+eliminó al completar su única ejecución.
 
-Condición de ejecución local: [guía oficial de tareas programadas de OpenAI](https://developers.openai.com/training/walkthroughs/scheduled-tasks).
+- [Plan nuevo revisado](../evidence/azure-retirement-reviewed-plan.json).
+- [Resultado y verificaciones](../evidence/azure-retirement.json).
+- [Ventana y estado final](../evidence/azure-demo-window.json).
+
+El costo acumulado sigue no disponible mediante Cost Management para esta oferta;
+no se interpreta como cero. Las capturas siguientes documentan la demostración
+anterior al retiro, no un servicio que continúe activo.
 
 ![Configuración efectiva: mínimo cero, máximo dos](../evidence/azure-scale-config.png)
 

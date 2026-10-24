@@ -1,0 +1,23 @@
+{
+  "startedAtUtc": "2026-10-24T01:00:13.4029074Z",
+  "finishedAtUtc": "2026-10-24T01:29:14.7450636Z",
+  "status": "Verified retired",
+  "terraformApplyExitCode": 0,
+  "appliedPlanSha256": "2c30a68475a530b7b589b0d8f4b96d78e5ad6ee351b5f38f53ea1716a8177092",
+  "firebaseModified": false,
+  "expectedDeletionCount": 6,
+  "actualAccruedCostUsd": null,
+  "costStatus": "Cost Management query unsupported for this student offer; not assumed zero",
+  "verifiedAtUtc": "2026-10-24T01:30:01.0912187Z",
+  "resourceGroupExists": false,
+  "remainingAzureResourceCount": 0,
+  "terraformStateResourceCount": 0,
+  "apiHealthHttpStatus": null,
+  "apiAvailability": "Transport unavailable after resource deletion",
+  "preserved": [
+    "Firebase project and user data",
+    "Source code and main branch",
+    "Screenshots and test results",
+    "APK and delivery report"
+  ]
+}

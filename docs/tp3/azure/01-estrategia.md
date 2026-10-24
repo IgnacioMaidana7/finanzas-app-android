@@ -1,7 +1,7 @@
 # TP3 · Estrategia de escalabilidad
 
 Fecha: 22/10/2026. Variante elegida: Azure para Estudiantes + Firebase existente.
-Estado: desplegado y probado con datos sintéticos en Azure; aprobación de crédito
+Estado: desplegado, probado y retirado el 23/10/2026 a las 22:29 de Buenos Aires; aprobación de crédito
 con presupuesto de control USD 5 y ventana de 24 h. El capítulo 16 no fue proporcionado; este
 documento describe decisiones del proyecto y no atribuye contenido al libro.
 
