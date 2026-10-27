@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -68,6 +69,7 @@ fun DashboardScreen(
     onNavigateToTransactions: () -> Unit,
     onNavigateToGoals: () -> Unit,
     onLogout: () -> Unit,
+    onNavigateToIndicators: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = viewModel(),
     accountViewModel: AccountViewModel = viewModel()
@@ -152,6 +154,11 @@ fun DashboardScreen(
             }
         }
 
+        OutlinedButton(onClick = onNavigateToIndicators, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Default.CurrencyExchange, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Cotizaciones e inflación")
+        }
         // Banner de Error si falló la carga de datos
         if (uiState.isError) {
             Card(

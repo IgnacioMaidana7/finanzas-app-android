@@ -16,5 +16,7 @@ data class Transaction(
     val accountId: String = "",
     val accountName: String = "",
     val date: Long = System.currentTimeMillis(),
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    // In-memory guard for reviewed receipt drafts. Never written to Firestore.
+    val expectedOwnerUid: String? = null
 )

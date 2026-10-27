@@ -38,6 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,26 +75,44 @@ fun NewTransactionScreen(
     modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel(),
-    accountViewModel: AccountViewModel = viewModel()
+    accountViewModel: AccountViewModel = viewModel(),
+    receiptViewModel: ReceiptViewModel = viewModel()
 ) {
     val saveState by viewModel.saveState.collectAsState()
     val accountUiState by accountViewModel.uiState.collectAsState()
 
-    var type by remember { mutableStateOf(TransactionType.GASTO) }
-    var amountText by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
+    var type by rememberSaveable { mutableStateOf(TransactionType.GASTO) }
+    var amountText by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable { mutableStateOf("") }
+    var receiptOwner by rememberSaveable { mutableStateOf<String?>(null) }
+    var accountReviewed by rememberSaveable { mutableStateOf(false) }
+    var categoryReviewed by rememberSaveable { mutableStateOf(false) }
+    val auth = remember { FirebaseAuth.getInstance() }
+    var activeUid by remember { mutableStateOf(auth.currentUser?.uid) }
+    DisposableEffect(auth) {
+        val listener = FirebaseAuth.AuthStateListener { activeUid = it.currentUser?.uid }
+        auth.addAuthStateListener(listener)
+        onDispose { auth.removeAuthStateListener(listener) }
+    }
+    LaunchedEffect(activeUid, receiptOwner) {
+        if (receiptOwner != null && receiptOwner != activeUid) {
+            amountText = ""; title = ""; receiptOwner = null
+            accountReviewed = false; categoryReviewed = false
+            viewModel.resetSaveState()
+        }
+    }
     val defaultExpenseCategory = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull()?.name ?: "Alimentación"
     val defaultExpenseCategoryId = CategoryConstants.PREDEFINED_EXPENSE_CATEGORIES.firstOrNull()?.id.orEmpty()
     val defaultIncomeCategory = CategoryConstants.PREDEFINED_INCOME_CATEGORIES.firstOrNull()?.name ?: "Salario"
     val defaultIncomeCategoryId = CategoryConstants.PREDEFINED_INCOME_CATEGORIES.firstOrNull()?.id.orEmpty()
 
-    var selectedCategory by remember { mutableStateOf(defaultExpenseCategory) }
-    var selectedCategoryId by remember { mutableStateOf(defaultExpenseCategoryId) }
+    var selectedCategory by rememberSaveable { mutableStateOf(defaultExpenseCategory) }
+    var selectedCategoryId by rememberSaveable { mutableStateOf(defaultExpenseCategoryId) }
 
-    var selectedAccountId by remember { mutableStateOf(Account.DEFAULT_CASH_ID) }
-    var selectedAccountName by remember { mutableStateOf(Account.DEFAULT_CASH_ACCOUNT.name) }
+    var selectedAccountId by rememberSaveable { mutableStateOf(Account.DEFAULT_CASH_ID) }
+    var selectedAccountName by rememberSaveable { mutableStateOf(Account.DEFAULT_CASH_ACCOUNT.name) }
 
-    var dateString by remember {
+    var dateString by rememberSaveable {
         mutableStateOf(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()))
     }
 
@@ -138,6 +159,21 @@ fun NewTransactionScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            if (type == TransactionType.GASTO) {
+                ReceiptScannerSection(receiptViewModel, saveState !is SaveTransactionState.Loading) { draft, owner ->
+                    amountText = draft.amount?.longValueExact()?.toString().orEmpty()
+                    title = draft.merchant.orEmpty()
+                    dateString = draft.date.orEmpty()
+                    receiptOwner = owner
+                    accountReviewed = false; categoryReviewed = false
+                    selectedAccountId = ""; selectedAccountName = ""
+                    selectedCategory = ""; selectedCategoryId = ""
+                    viewModel.resetSaveState()
+                }
+            }
+            if (receiptOwner != null && (!accountReviewed || !categoryReviewed)) {
+                Text("Ticket revisado. Elegí la cuenta de origen y la categoría antes de guardar.", color = MaterialTheme.colorScheme.primary)
+            }
             if (saveState is SaveTransactionState.Error) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -258,6 +294,7 @@ fun NewTransactionScreen(
                 onAccountSelected = { acc ->
                     selectedAccountId = acc.id
                     selectedAccountName = acc.name
+                    accountReviewed = true
                 }
             )
 
@@ -267,6 +304,7 @@ fun NewTransactionScreen(
                 onCategorySelected = { cat ->
                     selectedCategory = cat.name
                     selectedCategoryId = cat.id
+                    categoryReviewed = true
                 },
                 type = type,
                 categoryViewModel = categoryViewModel
@@ -314,10 +352,11 @@ fun NewTransactionScreen(
                         dateString = dateString,
                         categoryId = selectedCategoryId,
                         accountId = selectedAccountId,
-                        accountName = selectedAccountName
+                        accountName = selectedAccountName,
+                        expectedOwnerUid = receiptOwner
                     )
                 },
-                enabled = !isLoading,
+                enabled = !isLoading && (receiptOwner == null || (accountReviewed && categoryReviewed)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

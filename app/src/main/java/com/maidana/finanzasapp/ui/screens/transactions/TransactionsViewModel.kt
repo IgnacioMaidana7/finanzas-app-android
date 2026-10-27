@@ -14,9 +14,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
-import kotlin.math.roundToLong
+import com.google.firebase.auth.FirebaseAuth
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.ResolverStyle
+import java.util.UUID
 
 enum class TransactionFilter {
     ALL,
@@ -65,7 +68,8 @@ data class TransactionsUiState(
 }
 
 class TransactionsViewModel(
-    private val repository: TransactionRepository = FirestoreTransactionRepository()
+    private val repository: TransactionRepository = FirestoreTransactionRepository(),
+    private val currentUserId: () -> String? = { FirebaseAuth.getInstance().currentUser?.uid }
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionsUiState())
@@ -75,6 +79,9 @@ class TransactionsViewModel(
     val saveState: StateFlow<SaveTransactionState> = _saveState.asStateFlow()
 
     private var loadJob: kotlinx.coroutines.Job? = null
+    private var pendingPayload: String? = null
+    private var pendingId: String? = null
+    private var lastSuccessfulPayload: String? = null
 
     init {
         loadTransactions()
@@ -124,9 +131,14 @@ class TransactionsViewModel(
         dateString: String,
         categoryId: String = "",
         accountId: String = Account.DEFAULT_CASH_ID,
-        accountName: String = "Efectivo"
+        accountName: String = "Efectivo",
+        expectedOwnerUid: String? = null
     ) {
         if (_saveState.value is SaveTransactionState.Loading) return
+        if (expectedOwnerUid != null && currentUserId() != expectedOwnerUid) {
+            _saveState.value = SaveTransactionState.Error("La sesión cambió. Volvé a revisar el gasto.")
+            return
+        }
 
         // 1. Validar Monto obligatorio y mayor que cero (en pesos enteros)
         val cleanAmount = amountText.trim()
@@ -135,8 +147,7 @@ class TransactionsViewModel(
             return
         }
 
-        val rawAmount = cleanAmount.toLongOrNull()
-            ?: cleanAmount.replace(",", ".").toDoubleOrNull()?.toLong()
+        val rawAmount = runCatching { cleanAmount.replace(',', '.').toBigDecimal().longValueExact() }.getOrNull()
 
         if (rawAmount == null || rawAmount <= 0L) {
             _saveState.value = SaveTransactionState.Error("El monto debe ser un número entero mayor a cero.")
@@ -166,10 +177,8 @@ class TransactionsViewModel(
 
         // 5. Validar Fecha
         val parsedDate = try {
-            val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
-                isLenient = false
-            }
-            format.parse(dateString.trim())?.time
+            LocalDate.parse(dateString.trim(), DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT))
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
         } catch (_: Exception) {
             null
         }
@@ -179,17 +188,21 @@ class TransactionsViewModel(
             return
         }
 
-        _saveState.value = SaveTransactionState.Loading
-
         val resolvedCategoryId = categoryId.trim().ifBlank {
             CategoryConstants.ALL_PREDEFINED_CATEGORIES.firstOrNull {
                 it.type == type && it.name.equals(category.trim(), ignoreCase = true)
             }?.id.orEmpty()
         }
 
+        val payload = listOf(cleanTitle, rawAmount, type, category.trim(), parsedDate, resolvedCategoryId,
+            cleanAccountId, cleanAccountName, expectedOwnerUid).joinToString("\u0000")
+        if (_saveState.value is SaveTransactionState.Success && lastSuccessfulPayload == payload) return
+        _saveState.value = SaveTransactionState.Loading
+        if (pendingPayload != payload) { pendingPayload = payload; pendingId = UUID.randomUUID().toString() }
+        val transactionId = requireNotNull(pendingId)
         viewModelScope.launch {
             val newTransaction = Transaction(
-                id = "",
+                id = transactionId,
                 title = cleanTitle,
                 description = cleanTitle,
                 amount = rawAmount,
@@ -199,12 +212,15 @@ class TransactionsViewModel(
                 accountId = cleanAccountId,
                 accountName = cleanAccountName,
                 date = parsedDate,
-                createdAt = System.currentTimeMillis()
+                createdAt = System.currentTimeMillis(),
+                expectedOwnerUid = expectedOwnerUid
             )
 
             val result = repository.addTransaction(newTransaction)
             result.fold(
                 onSuccess = {
+                    lastSuccessfulPayload = payload
+                    pendingPayload = null; pendingId = null
                     _saveState.value = SaveTransactionState.Success
                 },
                 onFailure = { error ->
@@ -236,6 +252,7 @@ class TransactionsViewModel(
     }
 
     fun resetSaveState() {
+        lastSuccessfulPayload = null
         _saveState.value = SaveTransactionState.Idle
     }
 

@@ -54,6 +54,10 @@ class FirestoreTransactionRepository(
             val uid = auth.currentUser?.uid
                 ?: return Result.failure(IllegalStateException("No hay una sesión de usuario activa."))
 
+            if (transaction.expectedOwnerUid != null && transaction.expectedOwnerUid != uid) {
+                return Result.failure(IllegalStateException("La sesión cambió. Volvé a revisar el gasto."))
+            }
+
             val desc = transaction.description.ifBlank { transaction.title }
             val data = hashMapOf(
                 "type" to transaction.type.name,

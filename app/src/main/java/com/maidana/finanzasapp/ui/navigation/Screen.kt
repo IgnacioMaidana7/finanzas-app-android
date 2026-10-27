@@ -14,6 +14,7 @@ sealed class Screen(val route: String) {
 
     // Pantallas secundarias / formularios
     data object NewTransaction : Screen("new_transaction")
+    data object Indicators : Screen("indicators")
     data object NewBudget : Screen("new_budget")
     data object NewGoal : Screen("new_goal")
     data object GoalDetail : Screen("goal_detail/{goalId}") {

@@ -1,6 +1,9 @@
 package com.maidana.finanzasapp.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -27,6 +30,10 @@ import com.maidana.finanzasapp.ui.screens.transactions.TransactionsViewModel
 import com.maidana.finanzasapp.ui.screens.accounts.AccountViewModel
 import com.maidana.finanzasapp.ui.screens.auth.AuthViewModel
 import com.maidana.finanzasapp.ui.screens.categories.CategoryViewModel
+import com.maidana.finanzasapp.ui.screens.indicators.IndicatorReference
+import com.maidana.finanzasapp.ui.screens.indicators.IndicatorsScreen
+import com.maidana.finanzasapp.ui.screens.indicators.IndicatorsViewModel
+import java.time.YearMonth
 
 @Composable
 fun AppNavGraph(
@@ -98,6 +105,9 @@ fun AppNavGraph(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onNavigateToIndicators = {
+                    navController.navigate(Screen.Indicators.route)
                 }
             )
         }
@@ -141,6 +151,22 @@ fun AppNavGraph(
         }
 
         // --- Pantallas Secundarias / Formularios ---
+        composable(route = Screen.Indicators.route) {
+            val context = LocalContext.current
+            val indicatorsViewModel: IndicatorsViewModel = viewModel(factory = IndicatorsViewModel.factory(context))
+            // These private references belong to this destination and its current session.
+            // Do not reuse financial lists created before login at the root navigation level.
+            val indicatorBudgets: BudgetsViewModel = viewModel()
+            val indicatorGoals: GoalsViewModel = viewModel()
+            val budgets by indicatorBudgets.uiState.collectAsState()
+            val goals by indicatorGoals.uiState.collectAsState()
+            val references = budgets.budgets.map { budget ->
+                IndicatorReference("Presupuesto · ${budget.category}", budget.limitAmount,
+                    runCatching { YearMonth.of(budget.year, budget.month) }.getOrNull())
+            } + goals.goals.map { goal -> IndicatorReference("Meta · ${goal.title}", goal.targetAmount) }
+            IndicatorsScreen(indicatorsViewModel, references) { navController.popBackStack() }
+        }
+
         composable(route = Screen.NewTransaction.route) {
             NewTransactionScreen(
                 viewModel = transactionsViewModel,
