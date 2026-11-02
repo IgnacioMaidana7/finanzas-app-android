@@ -10,6 +10,22 @@
 - `backend/scripts/verify-cloud.mjs`: valida salud, seguridad y aislamiento con usuarios ficticios, y contempla perfiles `baseline`, `media`, `alta`, `pico`; el script limpia los datos sintéticos. Los perfiles superiores requieren aprobación explícita adicional; limitar costos y monitorear cuotas.
 - `docs/tp3-v2/plan-pruebas.md`: parámetros, métricas y precauciones de ejecución.
 
+## Validación automatizada del código (resultado real)
+
+**Fuente:** [GitHub Actions, ejecución 41540892011](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41540892011), commit `3426dc8`, 02/11/2026. No corresponde a una ejecución de carga contra Azure.
+
+| Componente | Resultado observado |
+|---|---|
+| Backend unitario | 19 pruebas aprobadas; 0 fallos |
+| Firebase emulado | 1 prueba de integración aprobada; 0 fallos |
+| Carga HTTP sintética local | 400 consultas; 16 operaciones en curso configuradas; 0 errores; 524 ms de duración |
+| Rendimiento local | 762,69 solicitudes/s; p50 17,94 ms; p95 35,84 ms; p99 58,81 ms |
+| Terraform | Formato, validación y 2 casos con proveedor simulado aprobados |
+| Android | `testDebugUnitTest`, `assembleDebug` y `lintDebug`: BUILD SUCCESSFUL |
+| Contenedor | Construcción y smoke tests completados en CI |
+
+**Alcance:** el backend de la prueba local utilizó verificación y consulta sintéticas con latencia simulada, sin Firebase real ni Azure. Su throughput no demuestra la capacidad real del despliegue. No se han medido todavía el escalado, el balanceo efectivo ni el costo de la nueva revisión en Azure.
+
 ## Matriz de pruebas
 
 | Perfil | Solicitudes programadas | Máximo operaciones en curso | Ritmo programado (req/s) | Resultado |

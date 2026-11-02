@@ -42,6 +42,22 @@ Consultar [02-configuracion-y-evidencias.md](02-configuracion-y-evidencias.md) y
 
 El [diagrama](03-arquitectura.md) refleja Android, Firebase, API Node.js, ingreso/balanceo administrado, KEDA y réplicas bajo demanda; incorpora DolarAPI, ArgentinaDatos y OCR local del TP7. El esquema distingue la arquitectura **preparada** de la infraestructura **implementada y observada**, que está pendiente de despliegue.
 
+## Validación automatizada del código (resultado real)
+
+**Fuente:** [GitHub Actions, ejecución 41540892011](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41540892011), commit `3426dc8`, 02/11/2026. No corresponde a una ejecución de carga contra Azure.
+
+| Componente | Resultado observado |
+|---|---|
+| Backend unitario | 19 pruebas aprobadas; 0 fallos |
+| Firebase emulado | 1 prueba de integración aprobada; 0 fallos |
+| Carga HTTP sintética local | 400 consultas; 16 operaciones en curso configuradas; 0 errores; 524 ms de duración |
+| Rendimiento local | 762,69 solicitudes/s; p50 17,94 ms; p95 35,84 ms; p99 58,81 ms |
+| Terraform | Formato, validación y 2 casos con proveedor simulado aprobados |
+| Android | `testDebugUnitTest`, `assembleDebug` y `lintDebug`: BUILD SUCCESSFUL |
+| Contenedor | Construcción y smoke tests completados en CI |
+
+**Alcance:** el backend de la prueba local utilizó verificación y consulta sintéticas con latencia simulada, sin Firebase real ni Azure. Su throughput no demuestra la capacidad real del despliegue. No se han medido todavía el escalado, el balanceo efectivo ni el costo de la nueva revisión en Azure.
+
 ## Resultados y conclusiones al momento de la revisión
 
 **Verificado:** recuperación del backend TP3 sobre la rama TP7, controles del contrato autenticado, infraestructura versionada, pruebas backend y Terraform en GitHub Actions. **Pendiente:** volver a desplegar Azure con cuenta autorizada, medir cargas progresivas y réplicas de la nueva ejecución, capturar configuración real, costos y probar la tarjeta Android en un dispositivo.
