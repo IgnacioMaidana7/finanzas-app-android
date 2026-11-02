@@ -49,8 +49,8 @@ try {
     requestsPerSecond: Number((count / (elapsedMs / 1000)).toFixed(2)),
     p50Ms: percentile(0.5), p95Ms: percentile(0.95), p99Ms: percentile(0.99),
     provesCloudAutoscaling: false };
-  await mkdir('../docs/tp3/evidence', { recursive: true });
-  await writeFile('../docs/tp3/evidence/load-local.json', JSON.stringify(report, null, 2) + '\n');
+  await mkdir('../docs/tp3-v2/evidencias', { recursive: true });
+  await writeFile('../docs/tp3-v2/evidencias/load-local.json', JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
   if (errors) process.exitCode = 1;
 } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }

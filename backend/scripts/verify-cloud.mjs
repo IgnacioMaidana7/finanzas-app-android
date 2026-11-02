@@ -1,5 +1,5 @@
 // Explicitly opt in only after approving cloud usage. Never runs in normal tests/CI.
-import { readFile, writeFile, unlink } from 'node:fs/promises';
+import { readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import assert from 'node:assert/strict';
@@ -19,8 +19,11 @@ const date = Date.parse(`${month}-15T12:00:00Z`);
 const accounts = [];
 const evidence = { environment: 'azure-real-synthetic-only', createdAt: new Date().toISOString(),
   month, realFinancialDataAccessed: false, serviceOrigin: origin.origin, checks: {}, cleanup: false };
-const output = new URL('../../docs/tp3/evidence/cloud-validation.json', import.meta.url);
-const recovery = new URL('../../docs/tp3/evidence/cloud-fixtures.local.json', import.meta.url);
+const outputDirectory = new URL('../../docs/tp3-v2/evidencias/', import.meta.url);
+const profileForOutput = ['baseline', 'media', 'alta', 'pico'].includes(process.env.TP3_LOAD_PROFILE) ? process.env.TP3_LOAD_PROFILE : 'baseline';
+const output = new URL(`cloud-validation-${profileForOutput}.json`, outputDirectory);
+const recovery = new URL('cloud-fixtures.local.json', outputDirectory);
+await mkdir(outputDirectory, {recursive: true});
 
 async function request(url, options = {}) {
   return fetch(url, { redirect: 'error', signal: AbortSignal.timeout(30000), ...options });

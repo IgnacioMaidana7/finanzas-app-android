@@ -67,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: tp3-local-synthetic-load
-          path: docs/tp3/evidence/load-local.json
+          path: docs/tp3-v2/evidencias/load-local.json
   terraform:
     runs-on: ubuntu-latest
     timeout-minutes: 10
