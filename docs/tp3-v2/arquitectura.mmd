@@ -1,0 +1,35 @@
+flowchart TB
+  subgraph PHONE["Android · FinanzasApp TP7"]
+    APP["Kotlin · Jetpack Compose · MVVM"]
+    CACHE["Caché local de indicadores"]
+    OCR["Google ML Kit · OCR local"]
+  end
+  subgraph CLOUD["Azure Container Apps · TP3 v2 (pendiente de redespliegue)"]
+    INGRESS["Entrada HTTPS · balanceo administrado"]
+    SCALE["KEDA · autoescalado HTTP · umbral 16 · 0..N"]
+    R1["Réplica Node.js 1"]
+    R2["Réplica Node.js 2"]
+    RX["Réplicas adicionales (según máximo aprobado)"]
+    INGRESS --> R1
+    INGRESS --> R2
+    INGRESS --> RX
+    SCALE -.-> R1
+    SCALE -.-> R2
+    SCALE -.-> RX
+  end
+  AUTH["Firebase Authentication"]
+  DB[("Cloud Firestore · usuarios / movimientos")]
+  DOLAR["DolarAPI · cotizaciones"]
+  INFL["ArgentinaDatos · inflación"]
+  APP -->|"Iniciar sesión"| AUTH
+  APP -->|"HTTPS · ID token"| INGRESS
+  R1 & R2 & RX -->|"Verificar ID token / sesión"| AUTH
+  R1 & R2 & RX -->|"REST + Security Rules por UID"| DB
+  APP <-->|"Lectura/escritura habitual"| DB
+  APP -->|"HTTPS con caché"| DOLAR
+  APP -->|"HTTPS con caché"| INFL
+  DOLAR --> CACHE
+  INFL --> CACHE
+  CACHE --> APP
+  APP --> OCR
+  OCR -->|"Borrador editable, confirmación"| APP
