@@ -1,0 +1,27 @@
+{
+  "name": "finanzas-summary-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:emulator": "node --test integration/*.test.mjs",
+    "load:local": "node scripts/load-local.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.2",
+    "firebase": "12.19.0",
+    "firebase-tools": "15.34.1"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.6",
+    "re2": "1.27.0"
+  }
+}
