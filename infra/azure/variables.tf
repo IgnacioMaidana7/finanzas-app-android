@@ -57,11 +57,11 @@ variable "approve_credit_usage" {
 }
 
 variable "max_replicas" {
-  type = number
-  default = 2
+  type        = number
+  default     = 2
   description = "Límite de réplicas. Incrementar sólo tras aprobar costos, cuotas y un plan de prueba controlado."
   validation {
-    condition = var.max_replicas >= 1 && var.max_replicas <= 6
+    condition     = var.max_replicas >= 1 && var.max_replicas <= 6
     error_message = "Este TP limita max_replicas al intervalo 1..6."
   }
 }
