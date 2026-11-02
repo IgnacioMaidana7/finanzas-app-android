@@ -1,25 +1,63 @@
-# TP3 renovado — Entregable 3: Diagrama de arquitectura
+# Entregable 3 | Diagrama de arquitectura actualizado
 
-El diagrama editable está en [arquitectura.mmd](arquitectura.mmd). Representa los componentes **propuestos y versionados**; la infraestructura Azure de la nueva versión está pendiente de despliegue, no debe marcarse como activa.
+**FinanzasApp TP3 v2, sobre TP7.** El diagrama a continuación representa la estructura de la versión preparada para la nube; **Azure aún no se ha desplegado** en esta revisión. Las réplicas dibujadas son instancias posibles, no un número permanente. Para un gráfico editable independiente ver [arquitectura.mmd](arquitectura.mmd).
 
-## Flujo financiero
+```mermaid
+flowchart TB
+  subgraph PHONE["Android · FinanzasApp TP7"]
+    APP["Kotlin · Jetpack Compose · MVVM"]
+    CACHE["Caché local de indicadores"]
+    OCR["Google ML Kit · OCR local"]
+  end
+  subgraph CLOUD["Azure Container Apps · TP3 v2 (pendiente de redespliegue)"]
+    INGRESS["Entrada HTTPS · balanceo administrado"]
+    SCALE["KEDA · autoescalado HTTP · umbral 16 · 0..N"]
+    R1["Réplica Node.js 1"]
+    R2["Réplica Node.js 2"]
+    RX["Réplicas adicionales (según máximo aprobado)"]
+    INGRESS --> R1
+    INGRESS --> R2
+    INGRESS --> RX
+    SCALE -.-> R1
+    SCALE -.-> R2
+    SCALE -.-> RX
+  end
+  AUTH["Firebase Authentication"]
+  DB[("Cloud Firestore · usuarios / movimientos")]
+  DOLAR["DolarAPI · cotizaciones"]
+  INFL["ArgentinaDatos · inflación"]
+  APP -->|"Iniciar sesión"| AUTH
+  APP -->|"HTTPS · ID token"| INGRESS
+  R1 & R2 & RX -->|"Verificar ID token / sesión"| AUTH
+  R1 & R2 & RX -->|"REST + Security Rules por UID"| DB
+  APP <-->|"Lectura/escritura habitual"| DB
+  APP -->|"HTTPS con caché"| DOLAR
+  APP -->|"HTTPS con caché"| INFL
+  DOLAR --> CACHE
+  INFL --> CACHE
+  CACHE --> APP
+  APP --> OCR
+  OCR -->|"Borrador editable, confirmación"| APP
+```
 
-1. Android se autentica con Firebase Auth.
-2. El usuario solicita el resumen de un mes y Android remite su ID token Firebase por HTTPS a Azure.
-3. El ingreso HTTP administrado envía la solicitud a una réplica disponible; el escalador ajusta el número de réplicas según demanda.
-4. La API verifica token, consulta el estado de sesión y lee **solo** los movimientos del UID autenticado mediante Firestore REST y Security Rules.
-5. Android recibe únicamente totales y cantidad de movimientos y los muestra en `CloudSummaryCard`.
+## Recorrido de datos
 
-## Flujos propios del TP7
+1. Kotlin/Jetpack Compose obtiene un **Firebase ID token** al autenticar al usuario.
+2. Para la tarjeta de resumen mensual, Android envía por HTTPS mes y token a Azure Container Apps.
+3. El **ingreso HTTP administrado** distribuye las solicitudes entre réplicas Node.js saludables; KEDA ajusta la cantidad según la demanda y el límite definido.
+4. Cada réplica verifica el token y estado de sesión, determina el UID del token validado, y consulta **Firestore REST con el token del propio usuario**. Las reglas de Firestore siguen aplicándose.
+5. Se devuelven ingresos, gastos, saldo neto y cantidad de movimientos sin entregar todos los documentos a Android.
 
-- Las cotizaciones e inflación se solicitan desde Android a DolarAPI y ArgentinaDatos y pueden guardarse temporalmente en caché local, según `CachedIndicatorRepository`.
-- El OCR con Google ML Kit se ejecuta en el dispositivo, genera un borrador editable, y solo tras confirmación explícita puede guardarse el gasto mediante el repositorio existente de Firestore.
-- Firebase Auth y Firestore siguen siendo la base de usuarios y persistencia; el backend no reemplaza las integraciones móviles existentes.
+## Integraciones incorporadas en el TP7
 
-## Balanceo, redundancia y restricciones
+- DolarAPI y ArgentinaDatos: **acceso HTTPS desde Android con caché local**; el backend Node.js no necesita ser intermediario de esas consultas.
+- Google ML Kit: **OCR local**, candidato editable y confirmación explícita antes de registrar el gasto en Firebase.
+- Firebase Auth y Firestore: autenticación y persistencia compartida; son dependencias que pueden limitar el escalado global.
 
-El control de réplicas y el ingreso HTTPS son responsabilidad de Container Apps. El dibujo muestra **capacidad potencial**, no réplicas permanentemente activas. Con mínimo cero hay arranque en frío. Con máximo 2 a 6, el límite es de capacidad de cómputo, no una garantía de disponibilidad zonal o regional. Firestore y los servicios terceros no se vuelven más escalables solo por agregar procesos Node.js.
+## Balanceo, redundancia y estado real
 
-## Verificación
+Azure Container Apps mantiene el ingreso HTTPS y el autoescalador HTTP con mínimo cero y un máximo parametrizado: **2 por defecto**, configurable a más solo tras revisar cuotas y presupuesto. Una réplica disponible puede atender cualquier solicitud porque no conserva sesión en memoria. Esto aporta redundancia de procesos, **no asegura tolerancia a un fallo completo de zona o región**.
 
-Una vez desplegada la nueva revisión, actualizar el diagrama con región, versión, máximo aprobado y estado efectivo; acompañarlo con capturas de configuración y evidencia temporal de autoescalado. Mantener separados arquitectura **diseñada** y arquitectura **verificada**.
+**Límites actuales:** no se ha validado redundancia regional, el indicador `/healthz` no prueba la disponibilidad de Firestore, y la escala no amplía las cuotas de Firebase ni los recursos de proveedores externos.
+
+Ver el [procedimiento de Azure](04-procedimiento-azure.md) y el [informe integrado](05-informe-integrado.md) para estado y evidencia.
