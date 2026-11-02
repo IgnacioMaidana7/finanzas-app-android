@@ -14,3 +14,22 @@
 .cxx
 local.properties
 .kotlin/
+
+# TP3: secretos, estado Terraform y artefactos temporales
+node_modules/
+.env
+.env.*
+!.env.example
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfplan
+terraform.tfvars
+*-credentials.json
+*-key.json
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+docs/tp3/evidence/cloud-*.local.json
+backend/summary-image.tar
+backend/summary-image.tar.sha256

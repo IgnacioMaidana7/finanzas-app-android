@@ -33,7 +33,7 @@ run "bounded_keyless_runtime" {
   assert {
     condition = (
       azurerm_container_app.summary[0].template[0].min_replicas == 0 &&
-      azurerm_container_app.summary[0].template[0].max_replicas == 2 &&
+      azurerm_container_app.summary[0].template[0].max_replicas == var.max_replicas &&
       one(azurerm_container_app.summary[0].template[0].http_scale_rule).concurrent_requests == "16" &&
       azurerm_container_app.summary[0].template[0].container[0].cpu == 0.25 &&
       azurerm_container_app.summary[0].template[0].container[0].memory == "0.5Gi"
