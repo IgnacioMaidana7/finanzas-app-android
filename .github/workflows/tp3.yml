@@ -93,4 +93,4 @@ jobs:
       - uses: android-actions/setup-android@v4
       - run: sdkmanager --channel=3 "platforms;android-37.0" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew testDebugUnitTest assembleDebug lintDebug --no-daemon
+      - run: bash ./gradlew testDebugUnitTest assembleDebug lintDebug --no-daemon
