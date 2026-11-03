@@ -48,6 +48,14 @@ run "bounded_keyless_runtime" {
     condition     = !azurerm_container_app.summary[0].ingress[0].allow_insecure_connections
     error_message = "El token Firebase sólo debe viajar por HTTPS."
   }
+  assert {
+    condition = (
+      azurerm_consumption_budget_subscription.tp3.amount == 5 &&
+      azurerm_consumption_budget_subscription.tp3.time_grain == "Monthly" &&
+      length(azurerm_consumption_budget_subscription.tp3.notification) == 3
+    )
+    error_message = "Conservar el presupuesto mensual de alerta de USD 5 y sus tres umbrales."
+  }
 }
 
 run "approval_required" {

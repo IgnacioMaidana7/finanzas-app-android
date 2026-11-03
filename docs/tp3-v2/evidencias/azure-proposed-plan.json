@@ -1,0 +1,65 @@
+{
+  "observedAtUtc": "2026-11-03T03:52:16.655219Z",
+  "status": "proposal-awaiting-user-approval",
+  "sourceCommit": "8e5aeedfac0d35527e2c9bfb2d38a19123a14d30",
+  "planSha256": "d2d94e5a5daebbcd03604a3385156846beccd776bc434233e5ee4de9194274f9",
+  "resources": [
+    {
+      "address": "azurerm_consumption_budget_subscription.tp3",
+      "actions": [
+        "create"
+      ],
+      "name": "budget-tp3-finanzas-v2"
+    },
+    {
+      "address": "azurerm_container_app_environment.tp3",
+      "actions": [
+        "create"
+      ],
+      "name": "cae-tp3-finanzas"
+    },
+    {
+      "address": "azurerm_container_registry.images",
+      "actions": [
+        "create"
+      ],
+      "name": "tp3finanzasv2im20261102"
+    },
+    {
+      "address": "azurerm_resource_group.tp3",
+      "actions": [
+        "create"
+      ],
+      "name": "rg-tp3-finanzas"
+    },
+    {
+      "address": "azurerm_role_assignment.pull",
+      "actions": [
+        "create"
+      ],
+      "name": null
+    },
+    {
+      "address": "azurerm_user_assigned_identity.runtime",
+      "actions": [
+        "create"
+      ],
+      "name": "id-tp3-summary"
+    }
+  ],
+  "appPhase2": {
+    "name": "ca-tp3-finanzas-summary",
+    "httpsOnly": true,
+    "minReplicas": 0,
+    "maxReplicas": 2,
+    "cpuPerReplica": 0.25,
+    "memoryPerReplica": "0.5Gi",
+    "image": "pending-verified-current-image"
+  },
+  "applied": false,
+  "sourceWorkingTreeChanges": [
+    "backend/scripts/verify-cloud.mjs",
+    "infra/azure/budget.tf",
+    "infra/azure/tests/config.tftest.hcl"
+  ]
+}

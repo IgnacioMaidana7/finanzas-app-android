@@ -23,6 +23,10 @@ terraform -chdir=infra/azure test
 
 Verificar en Azure Portal que la suscripción mantiene crédito estudiantil y límite de gasto; cotejar región Chile Central para el cómputo, Brazil South para el registro privado, cuotas por región, precio de ACR Basic y costos por operaciones Firebase. **Un presupuesto de 5 USD es una alarma de control, no un corte duro exacto**. No colocar claves en GitHub, en comandos compartidos ni en informes.
 
+En la preparación del 02–03/11/2026 se verificaron los proveedores necesarios individualmente. El catálogo completo de proveedores agotó el tiempo de espera de AzureRM 4.81.0. Para esa sesión se usó `$env:ARM_PROVIDER_ENHANCED_VALIDATION_RESOURCE_PROVIDERS = 'false'`, conservando `resource_provider_registrations="none"`: evita cargar ese catálogo para validación de nombres; no cambia autenticación, HTTPS, RBAC ni validación del servicio Azure. Los registros necesarios deben seguir comprobándose antes de aplicar.
+
+`infra/azure/budget.tf` prepara un presupuesto mensual de USD 5, filtrado al grupo del TP3, con alertas al 50 %, 80 % y 100 % al rol Propietario. No asumir que está creado hasta verificar la aplicación y la API de presupuestos.
+
 ## Paso 2. Preparación de las variables locales
 
 Copiar `infra/azure/terraform.tfvars.example` a `infra/azure/terraform.tfvars` y completar `subscription_id`, `location`, `registry_name` y `registry_location`. El archivo real está excluido de Git. Mantener `deploy_app=false` hasta disponer de imagen probada.
@@ -42,6 +46,8 @@ La fase de creación de recursos solo debe iniciarse tras autorización explíci
 ## Paso 4. Verificación funcional y carga por fases
 
 Ejecutar primero una prueba de salud y aislamiento. El script `backend/scripts/verify-cloud.mjs` utiliza exclusivamente cuentas y datos sintéticos de prueba; valida token, separación entre usuarios y limpieza. Antes de la primera ejecución: revisar que Firebase permita crear cuentas de prueba y que la aplicación tenga la cuota necesaria. Usar un terminal de monitoreo aparte y registrar la cantidad de réplicas en cada fase.
+
+**Firebase Spark confirmado por el usuario:** la comprobación funcional usa diez movimientos y, antes de la carga, elimina nueve fixtures. Cada consulta de carga procesa un solo movimiento. Los cuatro perfiles requieren aproximadamente 38.000 lecturas más controles, dentro de las 50.000 lecturas diarias solo si el resto del consumo lo permite. Consultar el uso previo; detener ante agotamiento. No habilitar Blaze automáticamente. No comparar estos resultados como si fueran consultas de diez movimientos. El JSON registra este tamaño de carga, commit y hash del verificador.
 
 ```powershell
 # Solo tras revisar el origen HTTPS y aprobar el gasto/uso.
@@ -81,7 +87,7 @@ Solo si el ensayo de 2 réplicas es estable y se comprueban cuotas/costos, consi
 
 Capturar: (a) recurso Container App y su regla HTTP; (b) 0..max réplicas y revisión efectiva; (c) comprobación HTTPS/health; (d) pruebas de aislamiento Auth/Firestore con cuentas sintéticas; (e) serie temporal de réplicas; (f) salida JSON de cada fase con tasas y percentiles; (g) factura/crédito si visible y límites; (h) validación Terraform; (i) APK probado en Android.
 
-Luego de respaldar evidencias, revisar `terraform plan -destroy`, confirmar que el grupo es exclusivo del TP3 y ejecutar `terraform destroy` únicamente tras revisar la lista de eliminaciones. Comprobar ausencia de recursos Azure, conservar Firebase intacto y dejar constancia de fecha/hora. No atribuir costos cero a herramientas que no entregaron datos.
+Luego de respaldar evidencias, dejar los recursos activos o retirarlos **solo según autorización explícita del usuario**. Si autoriza retiro, revisar `terraform plan -destroy`, confirmar que el grupo es exclusivo del TP3 y ejecutar la eliminación únicamente tras revisar la lista. Comprobar ausencia de recursos Azure, conservar Firebase intacto salvo los fixtures sintéticos autorizados y dejar constancia de fecha/hora. No atribuir costos cero a herramientas que no entregaron datos.
 
 ## Fuentes oficiales
 

@@ -1,6 +1,7 @@
 // Explicitly opt in only after approving cloud usage. Never runs in normal tests/CI.
 import { readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
-import { randomBytes, randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import assert from 'node:assert/strict';
 
@@ -19,6 +20,8 @@ const date = Date.parse(`${month}-15T12:00:00Z`);
 const accounts = [];
 const evidence = { environment: 'azure-real-synthetic-only', createdAt: new Date().toISOString(),
   month, realFinancialDataAccessed: false, serviceOrigin: origin.origin, checks: {}, cleanup: false };
+evidence.sourceCommit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+evidence.verifierSha256 = createHash('sha256').update(await readFile(new URL(import.meta.url))).digest('hex');
 const outputDirectory = new URL('../../docs/tp3-v2/evidencias/', import.meta.url);
 const profileForOutput = ['baseline', 'media', 'alta', 'pico'].includes(process.env.TP3_LOAD_PROFILE) ? process.env.TP3_LOAD_PROFILE : 'baseline';
 const output = new URL(`cloud-validation-${profileForOutput}.json`, outputDirectory);
@@ -95,6 +98,24 @@ try {
   evidence.checks.uidInjection = 400;
   evidence.checks.firestoreCrossUser = 403;
 
+  // Spark has 50,000 document reads/day, shared by the whole project. Keep the
+  // ten-document calculation check above, then measure a one-document workload
+  // consistently across all four profiles (~38,000 reads plus functional checks).
+  // This is a small-month workload, not evidence for ten-document throughput.
+  stage = 'prepare-spark-bounded-load';
+  for (const id of a.documents.slice(1)) {
+    const res = await request(documentUrl(a, id), {
+      method: 'DELETE', headers: { Authorization: `Bearer ${a.token}` }
+    });
+    assert.equal(res.status, 200);
+  }
+  const loadExpected = { ...expected, income: '100', expense: '0', net: '100', transactionCount: 1 };
+  const beforeLoad = await summary(a);
+  assert.equal(beforeLoad.status, 200);
+  assert.deepEqual(await beforeLoad.json(), loadExpected);
+  evidence.checks.tenDocumentCalculation = true;
+  evidence.firebasePlan = 'Spark (user confirmed)';
+
   // Progressive, authorized load profiles: never target public third-party APIs.
   // Each execution uses only synthetic Firebase accounts and synthetic movement data.
   stage = 'bounded-synthetic-load';
@@ -112,8 +133,10 @@ try {
   }
   const started = performance.now();
   const latencies = [];
-  let next = 0, errors = 0, inFlight = 0, peakInFlight = 0, stoppedEarly = false;
+  let next = 0, errors = 0, inFlight = 0, peakInFlight = 0, stoppedEarly = false, consecutiveErrors = 0;
   const failures = {};
+  const statusCounts = {};
+  const recentErrors = [];
   await Promise.all(Array.from({ length: profile.concurrency }, async () => {
     while (next < profile.requests && !stoppedEarly) {
       const i = next++;
@@ -122,19 +145,27 @@ try {
       const before = performance.now();
       inFlight++;
       peakInFlight = Math.max(peakInFlight, inFlight);
+      let requestFailed = false;
       try {
         const res = await summary(a);
+        statusCounts[res.status] = (statusCounts[res.status] || 0) + 1;
+        if (res.status === 429) stoppedEarly = true;
         if (res.status !== 200) throw new Error('HTTP_' + res.status);
-        assert.deepEqual(await res.json(), expected);
+        assert.deepEqual(await res.json(), loadExpected);
       } catch (error) {
+        requestFailed = true;
         errors++;
         const reason = /^HTTP_\d+$/.test(error?.message || '') ? error.message : 'FAILED_OR_INVALID';
         failures[reason] = (failures[reason] || 0) + 1;
       } finally {
         inFlight--;
         latencies.push(performance.now() - before);
-        // Fail-safe for unexpected quota, permission, or service trouble.
-        if (latencies.length >= 100 && errors >= 10 && errors / latencies.length >= 0.10) stoppedEarly = true;
+        consecutiveErrors = requestFailed ? consecutiveErrors + 1 : 0;
+        recentErrors.push(Number(requestFailed));
+        if (recentErrors.length > 100) recentErrors.shift();
+        // A sliding window also stops quota failures late in a long profile.
+        if (consecutiveErrors >= 10 ||
+            (recentErrors.length === 100 && recentErrors.reduce((sum, value) => sum + value, 0) >= 10)) stoppedEarly = true;
       }
     }
   }));
@@ -146,7 +177,8 @@ try {
     completedRequests: latencies.length, configuredConcurrency: profile.concurrency,
     observedPeakInFlight: peakInFlight, scheduledRequestsPerSecond: profile.rateRps,
     actualRequestsPerSecond: elapsedMs ? Number((latencies.length / (elapsedMs / 1000)).toFixed(2)) : null,
-    syntheticDocumentsPerSummary: 10, errors, failures, stoppedEarly,
+    syntheticDocumentsPerSummary: 1, errors, failures, statusCounts, stoppedEarly,
+    percentilePopulation: 'all completed requests, including failures',
     elapsedMs, p50Ms: percentile(0.5), p95Ms: percentile(0.95), p99Ms: percentile(0.99),
     provesAutoscalingByItself: false
   };

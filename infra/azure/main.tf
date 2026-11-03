@@ -21,6 +21,7 @@ resource "azurerm_container_registry" "images" {
   sku                 = "Basic"
   admin_enabled       = false
   tags                = local.tags
+  depends_on          = [azurerm_consumption_budget_subscription.tp3]
 }
 
 resource "azurerm_user_assigned_identity" "runtime" {
@@ -44,7 +45,8 @@ resource "azurerm_container_app_environment" "tp3" {
     name                  = "Consumption"
     workload_profile_type = "Consumption"
   }
-  tags = local.tags
+  tags       = local.tags
+  depends_on = [azurerm_consumption_budget_subscription.tp3]
 }
 
 resource "azurerm_container_app" "summary" {

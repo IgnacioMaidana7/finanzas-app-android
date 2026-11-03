@@ -36,3 +36,4 @@ backend/summary-image.tar.sha256
 
 # TP3 v2: identificadores de prueba y registros locales temporales
 /docs/tp3-v2/evidencias/cloud-fixtures.local.json
+/docs/tp3-v2/evidencias/*credit*.jpg

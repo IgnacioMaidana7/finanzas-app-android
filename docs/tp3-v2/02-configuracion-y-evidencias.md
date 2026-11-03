@@ -7,6 +7,7 @@
 - Terraform en `infra/azure/`: grupo de recursos, Container Apps Environment (Consumption), Container Registry privado, identidad administrada con permiso `AcrPull`, aplicación HTTPS en puerto interno 8080 y sonda `/healthz`.
 - Backend Node.js en `backend/`, con tests automatizados, API `GET /v1/summary?month=AAAA-MM` y validación del token Firebase.
 - Autoescalado con regla HTTP `http-demand` umbral 16, mínimo 0; `max_replicas=2` por defecto y variable validada para ensayos de capacidad (hasta 6, previa aprobación).
+- Presupuesto mensual de alerta USD 5 filtrado al grupo del TP3, con avisos 50/80/100 % al Propietario, preparado en Terraform; no aplicado todavía y no es corte automático.
 - `backend/scripts/verify-cloud.mjs`: valida salud, seguridad y aislamiento con usuarios ficticios, y contempla perfiles `baseline`, `media`, `alta`, `pico`; el script limpia los datos sintéticos. Los perfiles superiores requieren aprobación explícita adicional; limitar costos y monitorear cuotas.
 - `docs/tp3-v2/plan-pruebas.md`: parámetros, métricas y precauciones de ejecución.
 
@@ -48,7 +49,9 @@ No confundir operaciones en curso configuradas con simultaneidad observada. Las 
 - [ ] Serie temporal de réplicas asignadas y listas (antes/durante/después), con marcas de tiempo reales y sin interpolar.
 - [ ] Lecturas Firebase, consumo aproximado y costo realmente visible (o declarar costo no disponible).
 - [ ] Verificar la experiencia móvil de nueva tarjeta de resumen con una sesión de prueba.
-- [ ] Retirar recursos cuando termine la demostración, registrar el retiro y conservar evidencias.
+- [ ] Dejar activos o retirar recursos según autorización explícita; documentar la decisión y conservar evidencias.
+
+La [preparación del 02–03/11/2026](06-preparacion-cloud-2026-11-02.md) registra acceso, saldo y cuotas observados, plan sin aplicar y el ajuste de carga a un movimiento por consulta debido al plan Firebase Spark. Estas evidencias previas no prueban un despliegue v2.
 
 ## Distinción con el TP anterior
 

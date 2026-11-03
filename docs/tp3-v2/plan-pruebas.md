@@ -19,6 +19,8 @@ DolarAPI y ArgentinaDatos se consultan por el móvil con caché y límites del T
 
 Las operaciones en curso **observadas** pueden ser menores que el máximo del generador. Separar métricas de concurrencia, RPS programadas y RPS efectivas. No equiparar 20.000 solicitudes totales con 20.000 solicitudes simultáneas.
 
+**Tamaño del conjunto de carga:** el usuario confirmó Firebase Spark. La validación funcional comprueba diez movimientos; la carga usa uno por consulta para que los cuatro perfiles sumen unas 38.000 lecturas más controles, sujetas al consumo previo del proyecto y a la cuota compartida de 50.000 lecturas/día. No mide capacidad de resúmenes de diez o mil movimientos. Se conserva el mismo tamaño en los cuatro perfiles.
+
 El script `backend/scripts/verify-cloud.mjs` conserva las verificaciones de autorización y limpieza de usuarios sintéticos y admite `TP3_LOAD_PROFILE`. Perfiles mayores que baseline requieren `TP3_APPROVE_SYNTHETIC_CLOUD=1` y `TP3_APPROVE_HIGH_LOAD=1`; esos indicadores **no sustituyen la aprobación humana de crédito, cuota, región, servicio y permisos antes del despliegue**. En condiciones de errores sostenidos el ensayo se corta anticipadamente. El script registra evidencias en el JSON existente; guardar una copia identificada por perfil luego de cada prueba antes de ejecutar la siguiente.
 
 **Nota**: a mayor concurrencia puede aumentar el costo de lecturas Firestore, verificaciones Firebase y CPU. La infraestructura tiene `max_replicas=2` por defecto como límite seguro; para evaluar 3–6 réplicas deben comprobarse cuotas, costos y aprobación explícita. El umbral HTTP 16 es una referencia para la decisión de escalado, **no un tope estricto de 16 solicitudes por instancia**.
@@ -33,4 +35,4 @@ Además ejecutar pruebas de regresión de Firebase, DolarAPI, ArgentinaDatos, ca
 
 - Código histórico TP3 recuperado sobre base TP7; no se ha vuelto a desplegar.
 - No se han ejecutado nuevas pruebas cloud; ningún resultado de carga de este documento es medido.
-- Falta incorporar la tarjeta de resumen mensual a la UI del TP7 conservando las nuevas integraciones, ejecutar tests de integración y actualizar el diagrama e informe final con evidencias reales.
+- La tarjeta de resumen mensual ya se recuperó y las comprobaciones automáticas existentes pasaron. Faltan la prueba real en dispositivo, la integración con Azure v2 y el diagrama e informe final con evidencias reales.
