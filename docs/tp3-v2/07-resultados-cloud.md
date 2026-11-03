@@ -1,73 +1,70 @@
-# TP3 v2 - Resultados reales Azure, 03/11/2026
+# Seguridad y metodología de ensayo
 
-**Recursos retirados y verificados. 38000 solicitudes de carga completadas; 0 errores.**
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-La aplicación conserva Firebase Auth/Firestore, DolarAPI, ArgentinaDatos y ML Kit del TP7. La carga apunta exclusivamente al resumen del backend propio y usa un movimiento ficticio por consulta para respetar Spark. La comprobación funcional usa diez (ingresos 500, gastos 150, neto 350). No hubo carga masiva a DolarAPI ni ArgentinaDatos.
+Cada perfil repite estos controles con dos cuentas ficticias. La comprobación funcional crea diez movimientos y verifica ingresos 500, gastos 150, neto 350 y cantidad diez. Antes de la carga se eliminan nueve movimientos, de modo que cada resumen consulta uno. Los datos financieros reales no forman parte del ensayo.
 
-La imagen de backend es idéntica en todas las mediciones: commit `8e5aeedfac0d35527e2c9bfb2d38a19123a14d30`, digest `sha256:b4e785288de3580f721699fde89e6692f0726e1a694f511c006458c8b121ecbd`. Baseline se midió en el primer despliegue; media/alta/pico en un segundo despliegue con la misma región, recursos por réplica, límites y datos. No se afirma que los cuatro compartieran el mismo entorno físico. El verificador del pico agrega marcas UTC de inicio/fin para correlacionar las sondas; no cambia la carga programada ni el backend.
+Los cuatro perfiles requieren aproximadamente 38.000 lecturas más controles. Firebase utiliza Spark, con cuota compartida de 50.000 lecturas/día; el diseño del ensayo considera el consumo del proyecto. Esta carga no representa resúmenes de diez o mil movimientos.
 
-## Perfiles y fuentes
+Se revisan errores, limpieza, réplicas y costo entre niveles. El generador se detiene ante 429, diez errores consecutivos o diez fallos entre las últimas cien respuestas. DolarAPI y ArgentinaDatos no reciben carga masiva.
 
-| Perfil | Completadas / meta | RPS programado / real | Máximo en curso configurado / real | p50 / p95 / p99 ms | Errores |
-|---|---:|---:|---:|---:|---:|
-| baseline | 1000 / 1000 | 25 / 24.56 | 32 / 24 | 749 / 783 / 887 | 0 |
-| media | 5000 / 5000 | 60 / 59.48 | 64 / 64 | 750 / 1115 / 1949 | 0 |
-| alta | 12000 / 12000 | 100 / 99.39 | 128 / 128 | 816 / 2024 / 3347 | 0 |
-| pico | 20000 / 20000 | 160 / 127.64 | 256 / 256 | 1604 / 4853 / 6796 | 0 |
+La consola de Firebase mostró 5,6 K lecturas en un intervalo que terminaba antes de alta/pico. Se conserva como lectura parcial con demora, no como total de los cuatro perfiles.
 
-Los RPS efectivos y la concurrencia observada son mediciones, no equivalencias con sus techos. Los percentiles miden hasta completar y validar el JSON e incluyen fallos si existieran. La preparación y limpieza no integran la duración de carga.
+# Resultados de rendimiento
 
-Se completaron 38,000 solicitudes de carga con 0 errores. Los percentiles aumentaron con la carga; no se identifica un cuello de botella de CPU, red o Firebase con la telemetria disponible. La comparacion comprende dos despliegues separados con la misma configuracion e imagen. Una sonda de lectura dentro de una replica durante el final del pico puede agregar sobrecarga; no se descuenta ni se estima su efecto. El pico alcanzo 127.64 req/s, solo 79.8% de los 160 req/s programados; no se acredita esa capacidad sostenida con dos replicas.
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-- **baseline**: 2026-11-03T04:10:44.750Z; commit `66562605b5810fb78c3bcf1cb102d9622ca79a05`; verificador SHA-256 `b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb`; [JSON original](evidencias/cloud-validation-baseline.json). Limpieza: `True`.
-- **media**: 2026-11-03T04:58:24.548Z; commit `bb566ada9f1b5f076ef48f5e18ae50879f75ad75`; verificador SHA-256 `b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb`; [JSON original](evidencias/cloud-validation-media.json). Limpieza: `True`.
-- **alta**: 2026-11-03T05:07:26.313Z; commit `bb566ada9f1b5f076ef48f5e18ae50879f75ad75`; verificador SHA-256 `b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb`; [JSON original](evidencias/cloud-validation-alta.json). Limpieza: `True`.
-- **pico**: 2026-11-03T05:17:17.207Z; commit `36a4a8efcec8b3003638259ba235219fb3169541`; verificador SHA-256 `f28792ab2adb5e7e73c9ba7d8975af5af5a59b9951aab587b55bebdda794d1ea`; [JSON original](evidencias/cloud-validation-pico.json). Limpieza: `True`.
+Los totales programados y completados son 1.000, 5.000, 12.000 y 20.000. El máximo en curso es un límite del generador; se informa la concurrencia realmente observada. Solicitudes totales y usuarios simultáneos son magnitudes distintas.
 
-## Seguridad y limpieza
+Los percentiles abarcan desde el envío hasta leer y validar el JSON e incluirían las solicitudes fallidas, si existieran. La tasa efectiva utiliza la duración completa de la carga. Preparación, comprobaciones funcionales y limpieza quedan fuera de esa tasa.
 
-Se verifican HTTPS 200, anónimo 401, segundo usuario sin movimientos, UID inyectado 400, acceso cruzado Firestore 403, token revocado 401 y sesión nueva 200. Cada ejecución registra sus comprobaciones y limpieza en su JSON. Los fixtures son cuentas y movimientos ficticios; no se utiliza información financiera real.
+## Interpretación
 
-## Réplicas observadas
+Se completaron 38.000 solicitudes con cero errores. El aumento de carga elevó los percentiles de latencia. El perfil pico alcanzó 127,64 solicitudes/s, un 79,8 % de las 160 solicitudes/s programadas; esta configuración no acredita sostener esa meta. La telemetría disponible no permite atribuir el límite a CPU, red o Firebase. Una sonda dentro de una réplica durante el final del pico puede agregar sobrecarga; su efecto no se descuenta de las mediciones.
 
-| Perfil | Transiciones asignadas observadas | Muestras reales |
-|---|---|---:|
-| baseline | 0 -> 1 -> 2 -> 0 | 43 |
-| media | 1 -> 2 -> 0 | 51 |
-| alta | 1 -> 2 -> 0 | 56 |
-| pico | 1 -> 2 -> 0 | 59 |
+Las mediciones abarcan dos sesiones de aprovisionamiento con la misma imagen y configuración. Los orígenes y tiempos originales permiten identificar cada ensayo; no se supone el mismo entorno físico para todos los perfiles.
 
-El máximo aplicado permaneció en 2. Las listas y asignadas se conservan por separado; no se interpolan muestras faltantes. El baseline observó la segunda réplica después de terminar su carga; su p95 no demuestra mejora por dos procesos. La sonda de primera respuesta desde cero midió 3.956 ms incluida red/TLS/arranque, no inicio puro del proceso.
+La cantidad de solicitudes atendidas por cada instancia no se instrumentó. Las series de réplicas demuestran asignación y disponibilidad observadas; por sí solas no acreditan reparto de tráfico por instancia.
 
-## CPU, memoria y plataforma
+# Comportamiento del autoescalado
 
-Se detectó `Microsoft.Insights=NotRegistered` y se registró antes del segundo despliegue. Esto no prueba por sí solo que existan métricas ni recupera datos históricos. [Registro](evidencias/monitor-provider-registration.json).
+Series originales: [baseline](evidencias/azure-scale-baseline.json), [media](evidencias/azure-scale-media.json), [alta](evidencias/azure-scale-alta.json), [pico](evidencias/azure-scale-pico.json).
 
-| Fuente / métrica | Resultado |
-|---|---|
-| CPU Usage | Consulta Azure Monitor sin valores CPU verificables. |
-| WorkingSetBytes | Consulta Azure Monitor sin valores de memoria verificables. |
-| Replicas / Monitor | Maximo devuelto 0; comparar con API directa. |
-| Replicas / API directa | Maximo realmente observado 2; series por perfil, antes y despues de carga. |
-| Requests / Monitor | Suma visible 0, con el intervalo y dimensiones originales. No se sustituye por el contador cliente. |
-| Microsoft.Insights | Se verifico NotRegistered y se registro antes del segundo despliegue; no garantiza datos retroactivos. |
-| Sonda directa: CPU | Un intervalo bajo carga: 0.263 CPU-s/s en el cgroup de una replica, incluido el observador; no es Azure Monitor. |
-| Sonda directa: memoria | 170.40 MiB RSS del servidor Node en 2 muestras bajo carga de una replica. No es el working set total. |
+Puntos verdes: réplicas asignadas. Círculos naranjas: réplicas listas cuando difieren. Cada punto es una respuesta real de la API. El intervalo nominal de 5 s se amplía por la duración de cada consulta; no se completan espacios entre muestras.
 
-Las sondas directas ejecutan lecturas dentro de réplicas propias: `cpu.stat` es CPU acumulada del cgroup en microsegundos; RSS corresponde al proceso servidor Node, identificado entre procesos de ese contenedor. El observador puede sumar una pequeña sobrecarga; RSS no equivale a todo el working set de Azure. No se comparan estos datos como si fueran los contadores de Monitor. Las muestras se correlacionan con la ventana UTC del pico, sin inventar valores.
+Cada punto corresponde a una observación real; no se interpolan intervalos. Las mediciones abarcan dos sesiones de aprovisionamiento con la misma imagen, región, recursos por réplica y límite de escala. Los JSON identifican los orígenes y fechas. En baseline, la segunda réplica apareció después de finalizar la carga: su p95 no demuestra mejora por dos procesos.
 
-## Costos, permisos y retiro
+# Métricas y observabilidad
 
-Se verificó suscripción Estudiantes activa, límite de gasto habilitado y rol Propietario. Cada despliegue creó primero el presupuesto de alerta USD 5 mensual (50/80/100 % al Propietario), después ACR y entorno. No es corte duro. ACR Basic tiene tarifa consultada USD 0,1666/día; no se declara costo final cero por una pantalla o consulta vacía. Firebase permaneció Spark.
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-El usuario autorizó los tres niveles restantes con revisión entre cada uno y mantuvo la autorización de retiro. [Revisión media](evidencias/profile-review-media.json), [alta](evidencias/profile-review-alta.json), [pico](evidencias/profile-review-pico.json). No hubo avance automático entre niveles.
+Las respuestas originales de Azure Monitor se conservan con su intervalo y dimensiones. Los valores cero o las series vacías no se reemplazan por los contadores del generador. La sonda directa cubre una réplica y no permite diagnosticar el cuello de botella del conjunto.
 
-Estado final: **Recursos retirados y verificados**, comprobación UTC `2026-11-03T05:37:03.5891270Z`. Se conserva el retiro inicial y el final; se mantienen Firebase y sus datos habituales. [Retiro final](evidencias/retirement-verification.json).
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-## Límites
+Capturas originales: rango de réplicas y detalle de la regla HTTP. Las imágenes completas integran el paquete de evidencias.
 
-CPU y memoria de Azure Monitor siguen sin valores verificables. El costo final contabilizado aun no esta disponible. La prueba manual Android no esta acreditada: no habia un dispositivo conectado. La carga representa un movimiento por resumen. No se valido redundancia zonal/regional ni se aumento el maximo a seis. La sonda directa cubre solo una replica y una ventana corta del pico; el observador puede agregar sobrecarga. No completa la telemetria de Azure Monitor.
+# Costos y cierre operativo
 
-Las cuatro cargas autorizadas se revisaron individualmente. La evidencia directa de CPU/RSS, cuando existe, pertenece a contadores del contenedor/proceso y no se presenta como Azure Monitor. El costo final contabilizado y la prueba manual Android permanecen pendientes; no había dispositivo conectado. La observabilidad de plataforma se informa tal como fue devuelta. No se declara cerrado un punto sin evidencia.
+El presupuesto mensual de USD 5 se configura antes de ACR y del entorno. Sus alertas alcanzan 50 %, 80 % y 100 % del importe. El límite general de la oferta estudiantil y el presupuesto son controles distintos: **el presupuesto no es un corte duro.**
 
-El repositorio es público: capturas financieras/de cuenta, planes y estado completos permanecen en la entrega local. Las 400 llamadas locales y los datos del Azure de octubre son antecedentes, no mediciones v2.
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
+
+El presupuesto genera alertas y no detiene el consumo. La contabilización puede demorarse: un presupuesto con 0 USD y una consulta ActualCost sin filas no acreditan costo final cero. Las tarifas indicadas son referencias de cálculo, no una factura. Firebase utiliza el plan Spark.
+
+## Cierre de la infraestructura de ensayo
+
+La infraestructura se retiró después de respaldar las evidencias. La comprobación de Azure a las 2026-11-03T05:37:03Z confirmó siete recursos Terraform eliminados, grupo ausente, cero recursos propios y presupuesto propio ausente. Firebase se mantiene; las cuentas y los movimientos ficticios se limpiaron en cada perfil.
+
+Los recursos se retiraron después de observar el retorno a cero y de conservar los resultados. El origen HTTPS registrado identifica el servicio utilizado durante las pruebas, no un endpoint que permanezca activo.
+
+## Trazabilidad de los ensayos
+
+- [baseline](evidencias/cloud-validation-baseline.json): fecha UTC `2026-11-03T04:10:44.750Z`, commit `66562605b5810fb78c3bcf1cb102d9622ca79a05`, SHA-256 del verificador `b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb`.
+- [media](evidencias/cloud-validation-media.json): fecha UTC `2026-11-03T04:58:24.548Z`, commit `bb566ada9f1b5f076ef48f5e18ae50879f75ad75`, SHA-256 del verificador `b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb`.
+- [alta](evidencias/cloud-validation-alta.json): fecha UTC `2026-11-03T05:07:26.313Z`, commit `bb566ada9f1b5f076ef48f5e18ae50879f75ad75`, SHA-256 del verificador `b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb`.
+- [pico](evidencias/cloud-validation-pico.json): fecha UTC `2026-11-03T05:17:17.207Z`, commit `36a4a8efcec8b3003638259ba235219fb3169541`, SHA-256 del verificador `f28792ab2adb5e7e73c9ba7d8975af5af5a59b9951aab587b55bebdda794d1ea`.
+
+[Retiro verificado](evidencias/retirement-verification.json).
+
+Las consultas de Azure Monitor no aportaron CPU ni memoria verificables. La sonda directa solo cubre una réplica y una ventana breve del pico. El costo final contabilizado no está disponible. La carga representa un movimiento por resumen y no acredita meses de mayor volumen. No se comprobó redundancia zonal o regional ni distribución de solicitudes por instancia. El ensayo no incluye una prueba manual de Android u OCR en dispositivo.

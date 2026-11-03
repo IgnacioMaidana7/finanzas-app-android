@@ -1,43 +1,31 @@
-# TP3 renovado sobre el TP7 — plan de implementación y pruebas
+# Metodología de evaluación de escalabilidad
 
-**Base**: rama `tp7/integraciones-apis-sdk` de FinanzasApp (Kotlin, Firebase Auth, Firestore, DolarAPI, ArgentinaDatos y ML Kit OCR).
+# Seguridad y metodología de ensayo
 
-## Alcance
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-Se mantiene el objetivo y los tres entregables del TP3: estrategia de escalabilidad, infraestructura cloud real y diagrama actualizado. El TP7 es la nueva base funcional, no un cambio de consigna. Se recuperó el backend Node.js autenticado del TP3 anterior como código de referencia y la infraestructura Azure declarativa; **esto no significa que Azure esté desplegado ahora**.
+Cada perfil repite estos controles con dos cuentas ficticias. La comprobación funcional crea diez movimientos y verifica ingresos 500, gastos 150, neto 350 y cantidad diez. Antes de la carga se eliminan nueve movimientos, de modo que cada resumen consulta uno. Los datos financieros reales no forman parte del ensayo.
 
-DolarAPI y ArgentinaDatos se consultan por el móvil con caché y límites del TP7. **No someter servicios públicos de terceros a pruebas intensivas.** ML Kit funciona localmente y no se prueba con concurrencia cloud. La carga autorizada se concentra exclusivamente en el backend propio de resumen mensual, con cuentas y documentos sintéticos bajo control.
+Los cuatro perfiles requieren aproximadamente 38.000 lecturas más controles. Firebase utiliza Spark, con cuota compartida de 50.000 lecturas/día; el diseño del ensayo considera el consumo del proyecto. Esta carga no representa resúmenes de diez o mil movimientos.
 
-## Plan experimental propuesto (no son resultados)
+Se revisan errores, limpieza, réplicas y costo entre niveles. El generador se detiene ante 429, diez errores consecutivos o diez fallos entre las últimas cien respuestas. DolarAPI y ArgentinaDatos no reciben carga masiva.
 
-| Perfil | Total de solicitudes programadas | Máximo configurado de operaciones en curso | Ritmo programado |
-| --- | ---: | ---: | ---: |
-| baseline | 1.000 | 32 | 25/s |
-| media | 5.000 | 64 | 60/s |
-| alta | 12.000 | 128 | 100/s |
-| pico | 20.000 | 256 | 160/s |
+La consola de Firebase mostró 5,6 K lecturas en un intervalo que terminaba antes de alta/pico. Se conserva como lectura parcial con demora, no como total de los cuatro perfiles.
 
-Las operaciones en curso **observadas** pueden ser menores que el máximo del generador. Separar métricas de concurrencia, RPS programadas y RPS efectivas. No equiparar 20.000 solicitudes totales con 20.000 solicitudes simultáneas.
+# Resultados de rendimiento
 
-**Tamaño del conjunto de carga:** el usuario confirmó Firebase Spark. La validación funcional comprueba diez movimientos; la carga usa uno por consulta para que los cuatro perfiles sumen unas 38.000 lecturas más controles, sujetas al consumo previo del proyecto y a la cuota compartida de 50.000 lecturas/día. No mide capacidad de resúmenes de diez o mil movimientos. Se conserva el mismo tamaño en los cuatro perfiles.
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-El script `backend/scripts/verify-cloud.mjs` conserva las verificaciones de autorización y limpieza de usuarios sintéticos y admite `TP3_LOAD_PROFILE`. Perfiles mayores que baseline requieren `TP3_APPROVE_SYNTHETIC_CLOUD=1` y `TP3_APPROVE_HIGH_LOAD=1`; esos indicadores **no sustituyen la aprobación humana de crédito, cuota, región, servicio y permisos antes del despliegue**. En condiciones de errores sostenidos el ensayo se corta anticipadamente. El script registra evidencias en el JSON existente; guardar una copia identificada por perfil luego de cada prueba antes de ejecutar la siguiente.
+Los totales programados y completados son 1.000, 5.000, 12.000 y 20.000. El máximo en curso es un límite del generador; se informa la concurrencia realmente observada. Solicitudes totales y usuarios simultáneos son magnitudes distintas.
 
-**Nota**: a mayor concurrencia puede aumentar el costo de lecturas Firestore, verificaciones Firebase y CPU. La infraestructura tiene `max_replicas=2` por defecto como límite seguro; para evaluar 3–6 réplicas deben comprobarse cuotas, costos y aprobación explícita. El umbral HTTP 16 es una referencia para la decisión de escalado, **no un tope estricto de 16 solicitudes por instancia**.
+Los percentiles abarcan desde el envío hasta leer y validar el JSON e incluirían las solicitudes fallidas, si existieran. La tasa efectiva utiliza la duración completa de la carga. Preparación, comprobaciones funcionales y limpieza quedan fuera de esa tasa.
 
-## Métricas y comparación
+## Interpretación
 
-Registrar por perfil: requests programadas/realizadas, RPS reales, latencia p50/p95/p99, errores HTTP por categoría, solicitudes en vuelo observadas, CPU/memoria, réplicas asignadas/listas (serie temporal real), lecturas Firestore y costo. Tomar muestras antes, durante y después de carga. Comparar al menos configuración de 2 réplicas vs configuración ampliada (sólo si la cuenta permite), sin cambiar otras variables entre comparaciones.
+Se completaron 38.000 solicitudes con cero errores. El aumento de carga elevó los percentiles de latencia. El perfil pico alcanzó 127,64 solicitudes/s, un 79,8 % de las 160 solicitudes/s programadas; esta configuración no acredita sostener esa meta. La telemetría disponible no permite atribuir el límite a CPU, red o Firebase. Una sonda dentro de una réplica durante el final del pico puede agregar sobrecarga; su efecto no se descuenta de las mediciones.
 
-Además ejecutar pruebas de regresión de Firebase, DolarAPI, ArgentinaDatos, caché y ML Kit a través de mocks/dispositivo: no afirmar que una carga de API demuestra rendimiento de toda la app Android. Documentar pruebas manuales pendientes de OCR y emulador; no declararlas aprobadas sin ejecutarlas.
+Las mediciones abarcan dos sesiones de aprovisionamiento con la misma imagen y configuración. Los orígenes y tiempos originales permiten identificar cada ensayo; no se supone el mismo entorno físico para todos los perfiles.
 
-## Estado medido, 03/11/2026
+La cantidad de solicitudes atendidas por cada instancia no se instrumentó. Las series de réplicas demuestran asignación y disponibilidad observadas; por sí solas no acreditan reparto de tráfico por instancia.
 
-| Perfil | Completadas / meta | RPS programado / real | Máximo en curso configurado / real | p50 / p95 / p99 ms | Errores |
-|---|---:|---:|---:|---:|---:|
-| baseline | 1000 / 1000 | 25 / 24.56 | 32 / 24 | 749 / 783 / 887 | 0 |
-| media | 5000 / 5000 | 60 / 59.48 | 64 / 64 | 750 / 1115 / 1949 | 0 |
-| alta | 12000 / 12000 | 100 / 99.39 | 128 / 128 | 816 / 2024 / 3347 | 0 |
-| pico | 20000 / 20000 | 160 / 127.64 | 256 / 256 | 1604 / 4853 / 6796 | 0 |
-
-CPU y memoria de Azure Monitor siguen sin valores verificables. El costo final contabilizado aun no esta disponible. La prueba manual Android no esta acreditada: no habia un dispositivo conectado. La carga representa un movimiento por resumen. No se valido redundancia zonal/regional ni se aumento el maximo a seis. La sonda directa cubre solo una replica y una ventana corta del pico; el observador puede agregar sobrecarga. No completa la telemetria de Azure Monitor.
+Las consultas de Azure Monitor no aportaron CPU ni memoria verificables. La sonda directa solo cubre una réplica y una ventana breve del pico. El costo final contabilizado no está disponible. La carga representa un movimiento por resumen y no acredita meses de mayor volumen. No se comprobó redundancia zonal o regional ni distribución de solicitudes por instancia. El ensayo no incluye una prueba manual de Android u OCR en dispositivo.

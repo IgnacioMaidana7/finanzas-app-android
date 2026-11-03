@@ -1,43 +1,21 @@
-# TP3 renovado — Entregable 1: Estrategia de escalabilidad
+# Estrategia de escalabilidad
 
-**Materia:** Arquitecturas Móviles · **Aplicación:** FinanzasApp Android · **Base funcional:** TP7 · **Estado:** despliegue v2 y perfiles progresivos medidos; límites de evidencia explícitos.
+## Servicio y alcance funcional
 
-## 1. Objetivo y contexto
+Android solicita **GET /v1/summary?month=AAAA-MM** con un Firebase ID token. La API deriva el UID del token verificado, consulta los movimientos de ese usuario y devuelve ingresos, gastos, neto y cantidad. Utiliza importes enteros ARS y meses UTC. Limita la consulta a 1.000 movimientos y rechaza resultados parciales.
 
-La guía de trabajos prácticos (TP3, p. 3) pide diseñar una estrategia para escalar una aplicación móvil, considerando **balanceo de carga, redundancia y autoescalado**. Esta versión integra las funcionalidades existentes del TP7 (guía p. 10): Firebase Authentication y Cloud Firestore; cotizaciones en DolarAPI; inflación en ArgentinaDatos; y reconocimiento local de tickets mediante Google ML Kit. Las integraciones del TP7 no modifican los tres entregables exigidos para el TP3.
+## Balanceo de carga
 
-## 2. Alcance a escalar
+El ingreso HTTPS de Azure Container Apps recibe las solicitudes y las dirige a réplicas disponibles. Los procesos Node.js son sin estado: no almacenan sesiones ni resultados que obliguen a enviar un usuario a una instancia específica. El balanceo forma parte del servicio administrado; no se crea un recurso Azure Load Balancer independiente.
 
-La aplicación Android conserva sus operaciones directas con Firebase. Un backend Node.js 22 de resumen mensual se encarga de comprobar la sesión, consultar exclusivamente movimientos del usuario autenticado en Firestore y devolver ingresos, gastos, saldo neto y cantidad. La consulta limita el volumen a 1.000 movimientos por mes y rechaza totales parciales; no almacena sesión ni resultados en memoria compartida.
+## Autoescalado y uso de recursos
 
-Las otras integraciones tienen comportamientos distintos:
-- **DolarAPI y ArgentinaDatos:** consultas HTTPS desde Android con caché y reintentos acotados; su escalabilidad depende de terceros y NO son objetivos de carga masiva.
-- **ML Kit:** OCR ejecutado localmente en Android; su desempeño se estudia con pruebas en dispositivos, no aumentando réplicas Azure.
-- **Firebase Auth/Firestore:** dependencias compartidas; su tasa de operaciones, latencia, índices y cuotas pueden transformarse en cuello de botella incluso si se agregan instancias.
+La regla HTTP tiene umbral 16, mínimo 0 y máximo 2 réplicas. Cada réplica dispone de 0,25 vCPU y 0,5 GiB. El umbral guía al escalador; no constituye un tope estricto de solicitudes por proceso. El mínimo cero reduce consumo sin tráfico y admite una primera respuesta con arranque en frío.
 
-## 3. Escalado horizontal, balanceo y redundancia
+## Redundancia y continuidad
 
-Se utiliza Azure Container Apps, perfil Consumption, ingreso HTTPS administrado y una regla HTTP (umbral 16) para aumentar o reducir el número de réplicas. Se mantiene `min_replicas=0` para ahorrar cómputo sin tráfico y se parametriza `max_replicas`: **2 por defecto**, opción experimental de hasta **6** únicamente tras revisión de cuotas, capacidad y presupuesto.
+Varias réplicas permiten atender solicitudes mediante procesos reemplazables. La configuración medida no garantiza redundancia entre zonas o regiones. Un requisito de continuidad más exigente necesitaría un diseño y una evaluación adicionales; no se atribuye esa garantía a dos procesos del mismo entorno.
 
-El umbral HTTP orienta el escalador pero **no garantiza 16 solicitudes simultáneas como límite por réplica**. Las réplicas son sin estado para que cualquiera pueda responder; esto facilita balanceo y reemplazo de procesos. Un mínimo de cero implica arranque en frío; dos réplicas no prueban por sí solas continuidad ante fallo regional o de zona. La base Firestore continúa fuera de Azure.
+Las capturas originales se incluyen en el PDF y en el paquete local de evidencias.
 
-## 4. Seguridad y privacidad
-
-La API comprueba el ID token de Firebase y obtiene el UID del token verificado, nunca del parámetro enviado por la app. En Azure el token del usuario se utiliza en Firestore REST para conservar Security Rules. No se incorporan credenciales administrativas Google al contenedor ni se guardan tokens, UID o importes en los logs. Los ensayos usan **solo cuentas y transacciones sintéticas del propio proyecto**.
-
-## 5. Comparación de capacidad
-
-Comparar:
-1. Línea base histórica de octubre 2026: 1.000 consultas, 25 solicitudes/s programadas, 32 máximo en curso, cero errores, p95=883 ms y réplicas 1→2→0. Estas mediciones corresponden a un **despliegue anterior retirado**; no son resultados de esta versión.
-2. Carga actual progresiva sobre la base TP7: baseline (1.000/32), media (5.000/64), alta (12.000/128) y pico (20.000/256). Son parámetros del generador, no cargas realmente alcanzadas hasta que se ejecuten y midan.
-3. De ser viable, repetir la misma carga con máximo 2 vs. un máximo mayor de réplicas; variar **solo un factor** y controlar tráfico, datos sintéticos, región y configuración del contenedor.
-
-Métricas: RPS programados y reales, solicitudes simultáneas observadas, latencia p50/p95/p99, errores por HTTP, réplicas asignadas/listas en una misma escala temporal, CPU/memoria, número de lecturas Firestore, costos y arranque en frío. Se detiene la prueba ante fallos sostenidos o presupuesto/ cuotas en riesgo.
-
-## 6. Interpretación y límites
-
-El aumento de instancias sin mejoras en latencia puede señalar cuello de botella en Firebase o en red, no necesariamente en CPU. Evitar presentar el total de solicitudes como sinónimo de simultaneidad. Evaluar caché, consultas agregadas y resúmenes precomputados antes de seguir elevando el número de réplicas.
-
-**Resultados v2:** 38000 consultas completadas, 0 errores, máximo de réplicas observado 2. Los cuatro niveles, fuentes y límites están en [07-resultados-cloud.md](07-resultados-cloud.md). CPU y memoria de Azure Monitor siguen sin valores verificables. El costo final contabilizado aun no esta disponible. La prueba manual Android no esta acreditada: no habia un dispositivo conectado. La carga representa un movimiento por resumen. No se valido redundancia zonal/regional ni se aumento el maximo a seis. La sonda directa cubre solo una replica y una ventana corta del pico; el observador puede agregar sobrecarga. No completa la telemetria de Azure Monitor.
-
-**Referencias:** Guía de TP3 (p. 3), TP7 (p. 10); Lean Mobile App Development, capítulo 16; [escalado Azure](https://learn.microsoft.com/azure/container-apps/scale-app); repositorio `docs/tp7/README.md`.
+Ante crecimiento sostenido, evaluar consultas agregadas, caché o resúmenes precomputados. Agregar réplicas no amplía las cuotas de Firebase.
