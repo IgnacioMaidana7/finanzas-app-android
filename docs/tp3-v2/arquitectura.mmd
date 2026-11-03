@@ -1,35 +1,35 @@
 flowchart TB
-  subgraph PHONE["Android · FinanzasApp TP7"]
-    APP["Kotlin · Jetpack Compose · MVVM"]
-    CACHE["Caché local de indicadores"]
-    OCR["Google ML Kit · OCR local"]
+  subgraph PHONE["Android / FinanzasApp TP7"]
+    APP["Kotlin / Jetpack Compose / MVVM"]
+    CACHE["Indicadores con caché local"]
+    OCR["Google ML Kit / OCR local"]
   end
-  subgraph CLOUD["Azure Container Apps · TP3 v2 (pendiente de redespliegue)"]
-    INGRESS["Entrada HTTPS · balanceo administrado"]
-    SCALE["KEDA · autoescalado HTTP · umbral 16 · 0..N"]
-    R1["Réplica Node.js 1"]
-    R2["Réplica Node.js 2"]
-    RX["Réplicas adicionales (según máximo aprobado)"]
+  subgraph CLOUD["Azure Container Apps / Chile Central / despliegue real 03-11-2026"]
+    INGRESS["Ingreso HTTPS y balanceo administrado"]
+    SCALE["Escalado HTTP / regla 16 / mínimo 0 / máximo 2"]
+    R1["Réplica Node.js sin estado 1"]
+    R2["Réplica Node.js sin estado 2"]
     INGRESS --> R1
     INGRESS --> R2
-    INGRESS --> RX
     SCALE -.-> R1
     SCALE -.-> R2
-    SCALE -.-> RX
   end
-  AUTH["Firebase Authentication"]
-  DB[("Cloud Firestore · usuarios / movimientos")]
-  DOLAR["DolarAPI · cotizaciones"]
-  INFL["ArgentinaDatos · inflación"]
-  APP -->|"Iniciar sesión"| AUTH
-  APP -->|"HTTPS · ID token"| INGRESS
-  R1 & R2 & RX -->|"Verificar ID token / sesión"| AUTH
-  R1 & R2 & RX -->|"REST + Security Rules por UID"| DB
-  APP <-->|"Lectura/escritura habitual"| DB
-  APP -->|"HTTPS con caché"| DOLAR
-  APP -->|"HTTPS con caché"| INFL
-  DOLAR --> CACHE
-  INFL --> CACHE
-  CACHE --> APP
+  ACR["ACR Basic privado / Brazil South / digest SHA-256"]
+  ID["Identidad administrada / AcrPull"]
+  AUTH["Firebase Authentication / validación y revocación"]
+  DB[("Firestore / Security Rules por UID / Spark")]
+  DOLAR["DolarAPI / cotizaciones"]
+  INFL["ArgentinaDatos / inflación"]
+  APP -->|"Inicio de sesión"| AUTH
+  APP -->|"HTTPS + Firebase ID token"| INGRESS
+  R1 & R2 -->|"Verificar JWT y sesión"| AUTH
+  R1 & R2 -->|"REST con token del usuario"| DB
+  APP <-->|"Operaciones habituales"| DB
+  APP --> CACHE
+  CACHE -->|"HTTPS acotado; sin carga masiva"| DOLAR
+  CACHE -->|"HTTPS acotado; sin carga masiva"| INFL
   APP --> OCR
-  OCR -->|"Borrador editable, confirmación"| APP
+  OCR -->|"Borrador editable y confirmación"| APP
+  ID -->|"Lectura de imagen"| ACR
+  ACR -.-> R1
+  ACR -.-> R2

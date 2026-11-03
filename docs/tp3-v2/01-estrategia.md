@@ -1,6 +1,6 @@
 # TP3 renovado — Entregable 1: Estrategia de escalabilidad
 
-**Materia:** Arquitecturas Móviles · **Aplicación:** FinanzasApp Android · **Base funcional:** TP7 · **Estado:** desarrollo y pruebas locales pendientes de CI; ensayos cloud v2 aún no ejecutados.
+**Materia:** Arquitecturas Móviles · **Aplicación:** FinanzasApp Android · **Base funcional:** TP7 · **Estado:** despliegue v2 y perfil inicial medidos; perfiles superiores y telemetría completa pendientes.
 
 ## 1. Objetivo y contexto
 
@@ -38,6 +38,6 @@ Métricas: RPS programados y reales, solicitudes simultáneas observadas, latenc
 
 El aumento de instancias sin mejoras en latencia puede señalar cuello de botella en Firebase o en red, no necesariamente en CPU. Evitar presentar el total de solicitudes como sinónimo de simultaneidad. Evaluar caché, consultas agregadas y resúmenes precomputados antes de seguir elevando el número de réplicas.
 
-**Pendiente**: agregar aquí los resultados reales de la nueva ejecución (tablas y gráficos con fecha, perfil y configuración), con comparaciones medibles y conclusiones; no anticipar valores.
+**Resultado v2 (03/11/2026):** 1.000 consultas cloud, cero errores, p95 783 ms, 24,56 req/s y máximo en curso 24. La API de réplicas registró 0 -> 1 -> 2 -> 0; la segunda apareció después de la carga. No se acredita mejora por dos procesos. Las consultas resumieron un movimiento ficticio para respetar Spark. Perfiles mayores, CPU/memoria y costo final siguen pendientes. Ver [resultados auténticos](07-resultados-cloud.md).
 
 **Referencias:** Guía de TP3 (p. 3), TP7 (p. 10); *Lean Mobile App Development*, capítulo 16; documentación oficial Azure Container Apps https://learn.microsoft.com/azure/container-apps/scale-app; repositorio `docs/tp7/README.md`.

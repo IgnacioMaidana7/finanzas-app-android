@@ -1,62 +1,58 @@
-# TP3 renovado — Entregable 2: Configuración de nube y evidencias
+# Entregable 2 - Configuración cloud y evidencias reales
 
-**Estado actual:** infraestructura Azure del TP3 previo retirada; código e infraestructura versionados, **sin despliegue v2 aprobado**. Este documento no certifica que la API esté disponible en este momento.
+**Ejecución v2: 03/11/2026. Recursos retirados y verificados.** Esto documenta un despliegue que existió y fue probado; no un servicio permanente ni el cierre completo de todos los ensayos previstos.
 
-## Configuración reproducible preparada
+## Configuración aplicada
 
-- Terraform en `infra/azure/`: grupo de recursos, Container Apps Environment (Consumption), Container Registry privado, identidad administrada con permiso `AcrPull`, aplicación HTTPS en puerto interno 8080 y sonda `/healthz`.
-- Backend Node.js en `backend/`, con tests automatizados, API `GET /v1/summary?month=AAAA-MM` y validación del token Firebase.
-- Autoescalado con regla HTTP `http-demand` umbral 16, mínimo 0; `max_replicas=2` por defecto y variable validada para ensayos de capacidad (hasta 6, previa aprobación).
-- Presupuesto mensual de alerta USD 5 filtrado al grupo del TP3, con avisos 50/80/100 % al Propietario, preparado en Terraform; no aplicado todavía y no es corte automático.
-- `backend/scripts/verify-cloud.mjs`: valida salud, seguridad y aislamiento con usuarios ficticios, y contempla perfiles `baseline`, `media`, `alta`, `pico`; el script limpia los datos sintéticos. Los perfiles superiores requieren aprobación explícita adicional; limitar costos y monitorear cuotas.
-- `docs/tp3-v2/plan-pruebas.md`: parámetros, métricas y precauciones de ejecución.
-
-## Validación automatizada del código (resultado real)
-
-**Fuente:** [GitHub Actions, ejecución 41540892011](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41540892011), commit `3426dc8`, 02/11/2026. No corresponde a una ejecución de carga contra Azure.
-
-| Componente | Resultado observado |
+| Elemento | Valor observado |
 |---|---|
-| Backend unitario | 19 pruebas aprobadas; 0 fallos |
-| Firebase emulado | 1 prueba de integración aprobada; 0 fallos |
-| Carga HTTP sintética local | 400 consultas; 16 operaciones en curso configuradas; 0 errores; 524 ms de duración |
-| Rendimiento local | 762,69 solicitudes/s; p50 17,94 ms; p95 35,84 ms; p99 58,81 ms |
-| Terraform | Formato, validación y 2 casos con proveedor simulado aprobados |
-| Android | `testDebugUnitTest`, `assembleDebug` y `lintDebug`: BUILD SUCCESSFUL |
-| Contenedor | Construcción y smoke tests completados en CI |
+| Grupo | rg-tp3-finanzas |
+| Entorno | cae-tp3-finanzas, Chile Central; interfaz Express/Rápido |
+| Aplicación | ca-tp3-finanzas-summary |
+| Registro | tp3finanzasv2im20261102, Basic, Brazil South; administración por claves deshabilitada |
+| Identidad | id-tp3-summary; AcrPull sobre ese registro |
+| Recursos por réplica | 0,25 vCPU / 0,5 GiB |
+| Ingreso | HTTPS obligatorio, puerto interno 8080, sonda /healthz |
+| Escala | Mínimo 0 y máximo 2, regla http-demand / 16; interfaz mostró 300 s y 30 s |
+| Presupuesto | USD 5 mensuales, filtro de grupo, alertas 50/80/100 % al Propietario; no es corte duro |
 
-**Alcance:** el backend de la prueba local utilizó verificación y consulta sintéticas con latencia simulada, sin Firebase real ni Azure. Su throughput no demuestra la capacidad real del despliegue. No se han medido todavía el escalado, el balanceo efectivo ni el costo de la nueva revisión en Azure.
+Backend de la imagen: `8e5aeedfac0d35527e2c9bfb2d38a19123a14d30`. Verificador del ensayo: `66562605b5810fb78c3bcf1cb102d9622ca79a05` y hash en JSON. Digest desplegado:
 
-## Matriz de pruebas
+`sha256:b4e785288de3580f721699fde89e6692f0726e1a694f511c006458c8b121ecbd`
 
-| Perfil | Solicitudes programadas | Máximo operaciones en curso | Ritmo programado (req/s) | Resultado |
-|---|---:|---:|---:|---|
-| Base | 1.000 | 32 | 25 | Pendiente (v2) |
-| Media | 5.000 | 64 | 60 | Pendiente |
-| Alta | 12.000 | 128 | 100 | Pendiente |
-| Pico | 20.000 | 256 | 160 | Pendiente |
+El contenedor actual se exportó en [41574591148](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41574591148), se verificaron los hashes ZIP/TAR y se transfirió al ACR. La compilación no se presenta como medición cloud. No se usó la imagen histórica del 22/10.
 
-No confundir operaciones en curso configuradas con simultaneidad observada. Las métricas de carga deben registrarse **por perfil** con evidencia JSON/CSV, fecha y commit. Una prueba local con dependencias sintéticas no acredita escalado en Azure. Las pruebas cloud deben efectuarse solo en infraestructura propia, con datos artificiales y límites aprobados.
+Origen durante la prueba: `https://ca-tp3-finanzas-summary.gentlerock-685a5a8a.chilecentral.azurecontainerapps.io`.
 
-## Qué faltará evidenciar para dar por completado este entregable
+## Evidencia cloud
 
-- [ ] Confirmar cuenta Azure Estudiantes, región, cuotas, costos y permiso para gastar crédito.
-- [ ] Ejecutar y guardar `terraform validate`, `plan` y evidencia de recursos aplicados.
-- [ ] CI de backend, app Android y tests; imagen de contenedor por digest.
-- [ ] Capturas reales de configuración HTTPS, regla HTTP y límite de réplicas de la **nueva** ejecución.
-- [ ] Pruebas cloud con fixture sintético aislado: salud 200, sin token 401, aislamiento entre usuarios, revocación y limpieza.
-- [ ] Resultados de carga progresiva p50/p95/p99, fallos y RPS efectivo.
-- [ ] Serie temporal de réplicas asignadas y listas (antes/durante/después), con marcas de tiempo reales y sin interpolar.
-- [ ] Lecturas Firebase, consumo aproximado y costo realmente visible (o declarar costo no disponible).
-- [ ] Verificar la experiencia móvil de nueva tarjeta de resumen con una sesión de prueba.
-- [ ] Dejar activos o retirar recursos según autorización explícita; documentar la decisión y conservar evidencias.
+| Control | Resultado |
+|---|---|
+| HTTPS /healthz | 200, validación TLS normal |
+| Sin token | 401 |
+| HTTP | 301 a HTTPS; nunca se enviaron tokens por HTTP |
+| Resumen de diez movimientos | 500 ingresos, 150 gastos, 350 neto; 200 |
+| Otro usuario | Mes vacío; acceso cruzado Firestore 403 |
+| UID por parámetro | 400 |
+| Sesión revocada / nueva | 401 / 200 |
+| Limpieza | Dos cuentas y fixtures ficticios eliminados; cero errores reportados |
+| Carga baseline | 1.000 completadas, cero errores, 24,56 req/s, máximo en curso 24, p50/p95/p99 749/783/887 ms |
+| Escalado | 43 observaciones, 0 -> 1 -> 2 -> 0; máximo listo 2 |
 
-La [preparación del 02–03/11/2026](06-preparacion-cloud-2026-11-02.md) registra acceso, saldo y cuotas observados, plan sin aplicar y el ajuste de carga a un movimiento por consulta debido al plan Firebase Spark. Estas evidencias previas no prueban un despliegue v2.
+**Tamaño de carga:** un movimiento por resumen después de la prueba funcional de diez. Firebase Spark tiene 50.000 lecturas/día compartidas; los cuatro perfiles completos requerirían unas 38.000 más controles. No se habilitó Blaze.
 
-## Distinción con el TP anterior
+## Límites y pendientes
 
-Las capturas y registros del informe de octubre 2026 **son antecedentes**, no evidencia del despliegue actual. La nueva API de producción no está levantada y no hay resultados v2 de carga medidos.
+- Media (5.000/64/60), alta (12.000/128/100) y pico (20.000/256/160): **no ejecutados; autorización adicional pendiente**. No hay resultados inventados.
+- La segunda réplica apareció a las 04:12:06 UTC. El verificador ya había guardado el resultado y limpieza a las 04:11:41 UTC. El ensayo prueba reacción de escala, pero no rendimiento sostenido de dos réplicas ni balanceo por instancia.
+- Azure Monitor devolvió CPU/memoria sin valores y réplicas/solicitudes en cero, también en el portal. No se usaron esos ceros para negar los datos directos ni se rellenaron muestras.
+- No se aumentó el máximo a seis. La cuota regional de entornos se verificó; la API de cuotas del entorno devolvió lista vacía y no acredita seis réplicas.
+- Primera respuesta desde cero: 3.956 ms, incluida red/TLS/arranque; no tiempo puro de inicio del proceso.
+- Costo visible de presupuesto USD 0 antes del retiro: **no es costo final facturado**. Se conservaron las tarifas y evidencias locales; hay demora de contabilización.
+- Sin dispositivo Android conectado: prueba manual de OCR y tarjeta no acreditada en esta ejecución.
 
-## Condiciones de parada
+## Retiro y fuentes
 
-Detener ante errores sostenidos, cuotas insuficientes, costos no controlados o fallo de aislamiento/limpieza. No ejecutar cargas sobre DolarAPI, ArgentinaDatos ni otros servicios de terceros.
+Retiro autorizado por el usuario; estado: **retirados y verificados**, verificación UTC: 2026-11-03T04:31:04.5955416Z. Firebase habitual se conserva. Ver [resultados y archivos](07-resultados-cloud.md).
+
+Las evidencias técnicas están en `evidencias/`. Capturas de cuenta/crédito, estado y planes completos quedan fuera de este repositorio público. El informe PDF local incluye las capturas originales disponibles y explicita los pendientes. **No se declara cerrado todo el TP3 por haber pasado un perfil.**

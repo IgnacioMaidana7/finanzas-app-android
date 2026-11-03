@@ -33,6 +33,6 @@ Además ejecutar pruebas de regresión de Firebase, DolarAPI, ArgentinaDatos, ca
 
 ## Estado
 
-- Código histórico TP3 recuperado sobre base TP7; no se ha vuelto a desplegar.
-- No se han ejecutado nuevas pruebas cloud; ningún resultado de carga de este documento es medido.
+- Código TP3 recuperado sobre TP7; despliegue Azure v2 y perfil inicial ejecutados el 03/11/2026.
+- Baseline medido: 1.000 consultas sin errores, 24,56 req/s, p95 783 ms; ciclo real 0 -> 1 -> 2 -> 0. Los perfiles media/alta/pico siguen como plan no ejecutado y requieren autorización adicional.
 - La tarjeta de resumen mensual ya se recuperó y las comprobaciones automáticas existentes pasaron. Faltan la prueba real en dispositivo, la integración con Azure v2 y el diagrama e informe final con evidencias reales.

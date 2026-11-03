@@ -1,0 +1,13 @@
+{
+  "source": "Azure replica API zero immediately before client HTTPS health request",
+  "startedAtUtc": "2026-11-03T04:20:28.177Z",
+  "finishedAtUtc": "2026-11-03T04:20:32.135Z",
+  "replicasBefore": 0,
+  "httpStatus": 200,
+  "body": {
+    "status": "ok"
+  },
+  "firstResponseFromZeroMs": 3956,
+  "includesClientNetworkTlsAndPlatformStartup": true,
+  "isPureContainerStartupTime": false
+}

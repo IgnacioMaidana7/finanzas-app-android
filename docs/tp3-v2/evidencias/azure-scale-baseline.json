@@ -1,0 +1,221 @@
+{
+  "source": "Azure Container Apps replica API",
+  "samples": [
+    {
+      "atUtc": "2026-11-03T04:10:34.6814858Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:10:44.7812397Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:10:55.4418444Z",
+      "replicas": 1,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:11:05.8035115Z",
+      "replicas": 1,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:11:15.8183485Z",
+      "replicas": 1,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:11:25.9421572Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:11:36.2169193Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:11:46.3515790Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:11:56.2422390Z",
+      "replicas": 1,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:12:06.2837808Z",
+      "replicas": 2,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:12:17.5963945Z",
+      "replicas": 2,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:12:27.7902257Z",
+      "replicas": 2,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:12:38.7645186Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:12:49.6436134Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:12:59.7191079Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:13:10.0428695Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:13:20.3436288Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:13:30.6229819Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:13:40.6454423Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:13:51.2371200Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:14:02.4890387Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:14:12.3550306Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:14:22.8442464Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:14:33.1287502Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:14:43.8310135Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:14:54.6439853Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:15:05.5879432Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:15:15.3296209Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:15:25.3170973Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:15:35.5502550Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:15:45.3675025Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:15:55.4576895Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:16:05.7479454Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:16:15.6273558Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:16:25.5546890Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:16:36.8060282Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:16:46.7179758Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:16:57.7991957Z",
+      "replicas": 2,
+      "ready": 2
+    },
+    {
+      "atUtc": "2026-11-03T04:17:07.6206341Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:17:17.7214485Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:17:28.0773869Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:17:38.6639221Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:17:49.3316600Z",
+      "replicas": 0,
+      "ready": 0
+    }
+  ],
+  "includesPersonalData": false
+}

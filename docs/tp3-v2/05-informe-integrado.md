@@ -1,74 +1,46 @@
-# Informe integrado | TP3 v2: Estrategias de escalabilidad sobre FinanzasApp TP7
+# Informe integrado - TP3 v2 sobre FinanzasApp TP7
 
-**UTN - Facultad Regional San Francisco**  
-**Materia:** Arquitecturas Móviles, 2026  
-**Estudiantes:** Ignacio Maidana y José Santino Arroyo  
-**Docente:** Juan Pablo Bono  
-**Fecha de revisión:** 2 de noviembre de 2026  
-**Estado:** código e infraestructura preparada; despliegue y nuevas mediciones cloud pendientes.
+**UTN - Facultad Regional San Francisco**
+Arquitecturas Móviles, 2026
+Ignacio Maidana y José Santino Arroyo
+Docente: Juan Pablo Bono
+Revisión: 03/11/2026
 
-## Introducción
+## Estado real
 
-El TP3 de la guía requiere diseñar una estrategia de escalabilidad, configurar servicios en la nube y presentar un diagrama actualizado. Esta revisión toma como línea base la aplicación Android del TP7 sin convertir el trabajo en un TP de APIs. FinanzasApp conserva Kotlin, Jetpack Compose, MVVM, Firebase Authentication y Firestore; TP7 suma DolarAPI, ArgentinaDatos y Google ML Kit OCR.
+Se realizó el despliegue Azure v2, se ejecutó el perfil inicial con datos ficticios y se documentaron resultados auténticos. Recursos **retirados y verificados**. **La validación completa no está cerrada:** faltan los perfiles superiores, métricas CPU/memoria y costo final contabilizado. La prueba manual móvil tampoco está acreditada en esta ejecución.
 
-## Entregable 1. Estrategia de escalabilidad
+## 1. Estrategia de escalabilidad
 
-La funcionalidad escalable es un **resumen financiero mensual autenticado**. Android envía un token Firebase a una API Node.js 22 por HTTPS. El proceso verifica la identidad, consulta únicamente `users/{uid}/transactions` vía Firestore REST y devuelve ingresos, gastos, neto y cantidad de movimientos. Los importes usan enteros exactos y un mes UTC; se rechazan totales parciales cuando el mes excede 1.000 movimientos. El backend es **sin estado** para permitir múltiples réplicas.
+Se conserva Kotlin, Jetpack Compose, MVVM, Firebase Auth/Firestore, DolarAPI, ArgentinaDatos y Google ML Kit del TP7. El servicio escalable es el resumen mensual autenticado, con procesos Node.js 22 sin estado, límites de datos, ingreso HTTPS y escalado HTTP administrado. No se escalan ni se cargan masivamente los servicios públicos de indicadores; OCR permanece local.
 
-**Balanceo:** Azure Container Apps proporciona ingreso HTTPS administrado. **Autoescalado:** se define KEDA HTTP con umbral 16, `min_replicas=0` y `max_replicas=2` por defecto; el límite superior puede ampliarse hasta 6 previa validación del presupuesto y cuotas. **Redundancia:** dos o más réplicas independientes ayudan a reemplazar un proceso, pero no equivalen a redundancia entre zonas o regiones. **Dependencias:** Firebase puede convertirse en cuello de botella; DolarAPI y ArgentinaDatos no se someterán a carga masiva, y el OCR funciona localmente.
+El rango aplicado fue 0-2 réplicas de 0,25 vCPU / 0,5 GiB, regla HTTP 16. El portal mostró el entorno como Express/Rápido. No se amplió a seis ni se desplegó redundancia zonal/regional. [Estrategia](01-estrategia.md).
 
-La estrategia detallada está en [01-estrategia.md](01-estrategia.md).
+## 2. Configuración cloud con evidencias
 
-## Entregable 2. Configuración de nube
+Terraform creó grupo, presupuesto, ACR Basic privado en Brazil South, identidad AcrPull, entorno y aplicación en Chile Central. Imagen por digest SHA-256; HTTPS obligatorio; `/healthz` 200 y anónimo 401. El usuario autorizó gasto y retiro posterior. El presupuesto USD 5 es una alerta, no un corte duro. No se introdujeron credenciales administrativas Google.
 
-La infraestructura se expresa en `infra/azure` mediante Terraform: grupo aislado, Container Apps Environment Consumption, Container App en HTTPS (8080, `/healthz`), ACR Basic privado, identidad con permiso `AcrPull` y contenedor por digest SHA-256. No se agregan credenciales administrativas Google en Azure; el acceso a Firestore respeta la sesión Firebase y sus Security Rules.
+El verificador comprobó diez movimientos, aislamiento, revocación y limpieza. La carga usó uno por resumen para respetar Spark: **1.000/1.000 HTTP 200, cero errores, 24,56 req/s, máximo real en curso 24 de 32, p50/p95/p99 749/783/887 ms**. Son mediciones Azure nuevas; no son las 400 llamadas locales ni las del TP3 retirado en octubre.
 
-Se prepara una prueba escalonada con estas **metas de generación**, todavía **no medidas**:
+La API de Azure registró **0 -> 1 -> 2 -> 0** en 43 muestras. La segunda réplica apareció luego de terminar la carga, por lo que no se afirma mejora por dos procesos ni balanceo por instancia. Primera respuesta en una sonda separada desde cero: 3.956 ms incluida red/TLS/arranque.
 
-| Perfil | Total programado | Máximo configurado en vuelo | Tasa programada |
-|---|---:|---:|---:|
-| Base | 1.000 | 32 | 25/s |
-| Media | 5.000 | 64 | 60/s |
-| Alta | 12.000 | 128 | 100/s |
-| Pico | 20.000 | 256 | 160/s |
+Azure Monitor no entregó CPU/memoria y devolvió cero para Requests/Replicas; se conserva esa discrepancia. El costo visible antes del retiro era USD 0, sin factura final disponible. [Configuración](02-configuracion-y-evidencias.md) y [resultados verificables](07-resultados-cloud.md).
 
-Con cada perfil deben registrarse solicitudes completadas, máximo efectivamente en vuelo, tasa real, p50/p95/p99, errores, réplicas asignadas/listas, CPU, memoria, lecturas y costos. No se interpretan 20.000 solicitudes totales como 20.000 simultáneas. Las pruebas se limitarán al backend propio con **usuarios y movimientos sintéticos**; hay controles de parada ante errores sostenidos.
+## 3. Arquitectura actualizada
 
-**Histórico no comparable directamente:** el informe de octubre 2026 documentó 1.000 solicitudes, cero errores, p95=883 ms y réplicas 1→2→0; esos recursos fueron retirados el 23/10/2026. La v2 necesita un despliegue y evidencias nuevos.
+El diagrama muestra Android, ingreso y balanceo HTTPS Azure, regla HTTP, procesos sin estado, ACR e identidad, Firebase y las integraciones TP7. Distingue el rango configurado del número observado y registra el estado final de los recursos. [Diagrama y explicación](03-arquitectura.md), [fuente Mermaid](arquitectura.mmd).
 
-Consultar [02-configuracion-y-evidencias.md](02-configuracion-y-evidencias.md) y [04-procedimiento-azure.md](04-procedimiento-azure.md). La implementación Terraform y las pruebas unitarias/backend fueron validadas por una ejecución CI verde ([GitHub Actions 41539908250](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41539908250)); esto **no prueba que la nube esté desplegada**.
+## Conclusión y pendientes
 
-## Entregable 3. Diagrama actualizado
+El despliegue y el primer perfil dejaron evidencia funcional y de escala real. El ensayo corto no demuestra capacidad sostenida de dos réplicas; para eso se necesitan perfiles mayores autorizados, telemetría utilizable y comparación controlada. Media, alta y pico no se ejecutaron por falta de autorización adicional. Firebase Spark condiciona el conjunto a un movimiento por consulta. No se extrapola el resultado a toda la experiencia Android ni a otras regiones.
 
-El [diagrama](03-arquitectura.md) refleja Android, Firebase, API Node.js, ingreso/balanceo administrado, KEDA y réplicas bajo demanda; incorpora DolarAPI, ArgentinaDatos y OCR local del TP7. El esquema distingue la arquitectura **preparada** de la infraestructura **implementada y observada**, que está pendiente de despliegue.
+El informe PDF local acompaña estos tres entregables con capturas, gráficos y archivos originales. Los planes completos, estado y datos de cuenta no se publican en este repositorio público. El PR permanece borrador.
 
-## Validación automatizada del código (resultado real)
+## Fuentes
 
-**Fuente:** [GitHub Actions, ejecución 41540892011](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41540892011), commit `3426dc8`, 02/11/2026. No corresponde a una ejecución de carga contra Azure.
-
-| Componente | Resultado observado |
-|---|---|
-| Backend unitario | 19 pruebas aprobadas; 0 fallos |
-| Firebase emulado | 1 prueba de integración aprobada; 0 fallos |
-| Carga HTTP sintética local | 400 consultas; 16 operaciones en curso configuradas; 0 errores; 524 ms de duración |
-| Rendimiento local | 762,69 solicitudes/s; p50 17,94 ms; p95 35,84 ms; p99 58,81 ms |
-| Terraform | Formato, validación y 2 casos con proveedor simulado aprobados |
-| Android | `testDebugUnitTest`, `assembleDebug` y `lintDebug`: BUILD SUCCESSFUL |
-| Contenedor | Construcción y smoke tests completados en CI |
-
-**Alcance:** el backend de la prueba local utilizó verificación y consulta sintéticas con latencia simulada, sin Firebase real ni Azure. Su throughput no demuestra la capacidad real del despliegue. No se han medido todavía el escalado, el balanceo efectivo ni el costo de la nueva revisión en Azure.
-
-## Resultados y conclusiones al momento de la revisión
-
-**Verificado:** recuperación del backend TP3 sobre la rama TP7, controles del contrato autenticado, infraestructura versionada, pruebas backend y Terraform en GitHub Actions. **Pendiente:** volver a desplegar Azure con cuenta autorizada, medir cargas progresivas y réplicas de la nueva ejecución, capturar configuración real, costos y probar la tarjeta Android en un dispositivo.
-
-El objetivo del trabajo no es solo mostrar que hay más réplicas, sino determinar si efectivamente mejora la respuesta del servicio, qué límites aparecen en Firebase y cuánto cuesta cada cambio de capacidad. No se introducen resultados inventados ni se reutilizan capturas históricas como evidencia v2.
-
-## Referencias
-
-- Guía de Trabajos Prácticos: TP3, Estrategias de Escalabilidad, y TP7, Integración de APIs y SDKs.
-- Mike van Drongelen, *Lean Mobile App Development*, capítulo 16.
-- Informe TP3 anterior, octubre 2026 (referencia histórica de infraestructura y mediciones).
-- Microsoft: https://learn.microsoft.com/es-es/azure/container-apps/scale-app
-- Microsoft: https://learn.microsoft.com/es-es/azure/container-apps/billing
-- Firebase: https://firebase.google.com/docs/firestore/use-rest-api
+- [Azure Container Apps: escalado](https://learn.microsoft.com/en-us/azure/container-apps/scale-app)
+- [Container Apps Express](https://learn.microsoft.com/en-us/azure/container-apps/express-overview)
+- [Métricas](https://learn.microsoft.com/en-us/azure/container-apps/metrics)
+- [Presupuestos](https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/tutorial-acm-create-budgets)
+- [Cuotas Firestore](https://firebase.google.com/docs/firestore/quotas)
+- Guía TP3 y TP7 de Arquitecturas Móviles; Lean Mobile App Development, capítulo 16.

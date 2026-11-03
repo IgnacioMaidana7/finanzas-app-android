@@ -1,6 +1,6 @@
 # TP3 v2 | Operación de Azure y captura de evidencias (procedimiento de ejecución)
 
-**ESTADO:** Preparado para ejecución en una suscripción propia, **NO desplegado en esta versión**. No interpretar estas instrucciones como evidencias de una implementación real. La prueba anterior (22-23/10/2026) se retiró y no está activa.
+**ESTADO:** procedimiento reproducible. La ejecución v2 del 03/11/2026 sí se desplegó y midió el perfil inicial; ver [resultados](07-resultados-cloud.md). Las instrucciones por sí solas no son evidencia. La prueba anterior de octubre está retirada.
 
 ## Objetivo y requisitos
 
@@ -30,6 +30,12 @@ En la preparación del 02–03/11/2026 se verificaron los proveedores necesarios
 ## Paso 2. Preparación de las variables locales
 
 Copiar `infra/azure/terraform.tfvars.example` a `infra/azure/terraform.tfvars` y completar `subscription_id`, `location`, `registry_name` y `registry_location`. El archivo real está excluido de Git. Mantener `deploy_app=false` hasta disponer de imagen probada.
+
+Antes de planificar un despliegue real, inicializar el backend local con una ruta fuera del repositorio y de OneDrive, por ejemplo `terraform -chdir=infra/azure init -backend-config="path=C:/ruta-privada/tp3-v2/terraform.tfstate"`. `init -backend=false` sirve solo para validación sin estado. No confiar en `-state` del plan para elegir la ruta del posterior apply; usar el backend explícito y comprobarla.
+
+Antes de planificar un despliegue real, inicializar el backend local con una ruta fuera del repositorio y de OneDrive, por ejemplo `terraform -chdir=infra/azure init -backend-config="path=C:/ruta-privada/tp3-v2/terraform.tfstate"`. `init -backend=false` sirve solo para validación sin estado. No confiar en `-state` del plan para elegir la ruta del posterior apply; usar el backend explícito y comprobarla.
+
+Antes de planificar un despliegue real, inicializar el backend local con una ruta fuera del repositorio y de OneDrive, por ejemplo `terraform -chdir=infra/azure init -backend-config="path=C:/ruta-privada/tp3-v2/terraform.tfstate"`. `init -backend=false` sirve solo para validación sin estado. No confiar en `-state` del plan para elegir la ruta del posterior apply; usar el backend explícito y comprobarla.
 
 La fase de creación de recursos solo debe iniciarse tras autorización explícita del crédito. `approve_credit_usage=true` habilita la precondición Terraform, pero no sustituye esa autorización. No incorporar tokens ni secretos a variables de línea de comandos o capturas públicas.
 
