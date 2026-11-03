@@ -1,0 +1,12 @@
+{
+  "observedAtUtc": "2026-11-03T04:07:36.1227497Z",
+  "source": "Firebase Console Firestore Usage, last 24h",
+  "project": "finanzasapp-1f76a",
+  "plan": "Spark",
+  "visibleReads": 93,
+  "visibleWrites": 2,
+  "visibleWindowLocal": "2026-11-02 02:00 to 2026-11-03 01:00 America/Buenos_Aires",
+  "quotaDocumentReadsPerDay": 50000,
+  "isExactBillingTotal": false,
+  "note": "Dashboard includes console reads, may lag and differs from quota/billing."
+}

@@ -1,0 +1,50 @@
+{
+  "containers": [
+    {
+      "image": "tp3finanzasv2im20261102.azurecr.io/summary@sha256:b4e785288de3580f721699fde89e6692f0726e1a694f511c006458c8b121ecbd",
+      "name": "summary",
+      "resources": {
+        "cpu": 0.25,
+        "ephemeralStorage": "1Gi",
+        "memory": "0.5Gi"
+      }
+    }
+  ],
+  "identityType": "UserAssigned",
+  "ingress": {
+    "additionalPortMappings": null,
+    "allowInsecure": false,
+    "clientCertificateMode": null,
+    "corsPolicy": null,
+    "customDomains": null,
+    "exposedPort": null,
+    "external": true,
+    "fqdn": "ca-tp3-finanzas-summary.gentlerock-685a5a8a.chilecentral.azurecontainerapps.io",
+    "ipSecurityRestrictions": null,
+    "stickySessions": null,
+    "targetPort": 8080,
+    "traffic": null,
+    "transport": "Http"
+  },
+  "location": "Chile Central",
+  "name": "ca-tp3-finanzas-summary",
+  "provisioning": "Succeeded",
+  "revision": "ca-tp3-finanzas-summary--latest",
+  "running": "Running",
+  "scale": {
+    "cooldownPeriod": null,
+    "maxReplicas": 2,
+    "minReplicas": null,
+    "pollingInterval": null,
+    "rules": [
+      {
+        "http": {
+          "metadata": {
+            "concurrentRequests": "16"
+          }
+        },
+        "name": "http-demand"
+      }
+    ]
+  }
+}

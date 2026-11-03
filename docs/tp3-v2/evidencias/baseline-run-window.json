@@ -1,0 +1,7 @@
+{
+  "profile": "baseline",
+  "source": "verifier createdAt and evidence-file write time",
+  "startedAtUtc": "2026-11-03T04:10:44.75Z",
+  "finishedEvidenceWriteAtUtc": "2026-11-03T04:11:41.9647686Z",
+  "includesFunctionalSetupAndCleanup": true
+}

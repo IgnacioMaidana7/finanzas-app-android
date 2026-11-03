@@ -1,0 +1,22 @@
+{
+  "interval": "PT1M",
+  "timespan": "2026-11-03T04:55:00Z/2026-11-03T05:01:20Z",
+  "value": [
+    {
+      "name": {
+        "localizedValue": "CPU Usage",
+        "value": "UsageNanoCores"
+      },
+      "timeseries": [],
+      "unit": "NanoCores"
+    },
+    {
+      "name": {
+        "localizedValue": "Memory Working Set Bytes",
+        "value": "WorkingSetBytes"
+      },
+      "timeseries": [],
+      "unit": "Bytes"
+    }
+  ]
+}

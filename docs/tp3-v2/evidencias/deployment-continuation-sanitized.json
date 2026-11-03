@@ -1,0 +1,56 @@
+{
+  "observedAtUtc": "2026-11-03T04:58:18.2103785Z",
+  "source": "Azure Container Apps API",
+  "infrastructureCommit": "bb566ada9f1b5f076ef48f5e18ae50879f75ad75",
+  "imageSourceCommit": "8e5aeedfac0d35527e2c9bfb2d38a19123a14d30",
+  "configuration": {
+    "containers": [
+      {
+        "image": "tp3finanzasv2im20261102.azurecr.io/summary@sha256:b4e785288de3580f721699fde89e6692f0726e1a694f511c006458c8b121ecbd",
+        "name": "summary",
+        "resources": {
+          "cpu": 0.25,
+          "ephemeralStorage": "1Gi",
+          "memory": "0.5Gi"
+        }
+      }
+    ],
+    "identityType": "UserAssigned",
+    "ingress": {
+      "additionalPortMappings": null,
+      "allowInsecure": false,
+      "clientCertificateMode": null,
+      "corsPolicy": null,
+      "customDomains": null,
+      "exposedPort": null,
+      "external": true,
+      "fqdn": "ca-tp3-finanzas-summary.graymushroom-cf292f83.chilecentral.azurecontainerapps.io",
+      "ipSecurityRestrictions": null,
+      "stickySessions": null,
+      "targetPort": 8080,
+      "traffic": null,
+      "transport": "Http"
+    },
+    "location": "Chile Central",
+    "name": "ca-tp3-finanzas-summary",
+    "provisioning": "Succeeded",
+    "revision": "ca-tp3-finanzas-summary--latest",
+    "scale": {
+      "cooldownPeriod": null,
+      "maxReplicas": 2,
+      "minReplicas": null,
+      "pollingInterval": null,
+      "rules": [
+        {
+          "http": {
+            "metadata": {
+              "concurrentRequests": "16"
+            }
+          },
+          "name": "http-demand"
+        }
+      ]
+    }
+  },
+  "note": "Second v2 deployment; same image/configuration, new environment FQDN."
+}

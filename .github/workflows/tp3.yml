@@ -1,0 +1,96 @@
+name: TP3 backend and infrastructure
+on:
+  push:
+    branches: [main, 'tp3/escalabilidad-sobre-tp7']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      export_image:
+        description: Export the tested image privately for a local registry transfer
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npx firebase emulators:exec --config ../firebase.json --project demo-finanzas-tp3 --only auth,firestore "npm run test:emulator"
+      - run: npm run load:local
+      - run: docker build -t tp3-summary:test .
+      - name: Container smoke test
+        run: |
+          docker run --detach --rm --name tp3-summary --publish 127.0.0.1:8080:8080 --env FIREBASE_PROJECT_ID=demo-finanzas-tp3 --env K_SERVICE=ci tp3-summary:test
+          trap 'docker logs tp3-summary; docker stop tp3-summary' EXIT
+          curl --fail --retry 10 --retry-all-errors --retry-delay 1 --max-time 2 http://127.0.0.1:8080/healthz
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8080/v1/summary?month=2026-10')
+          test "$status" = 401
+      - name: Azure container smoke test without administrative credentials
+        run: |
+          docker run --detach --rm --name tp3-summary-azure --publish 127.0.0.1:8081:8080 --env FIREBASE_PROJECT_ID=demo-finanzas-tp3 --env FIREBASE_DATA_ACCESS=user-rest --env FIREBASE_WEB_API_KEY=synthetic-client-key --env CONTAINER_APP_NAME=ci tp3-summary:test
+          trap 'docker logs tp3-summary-azure; docker stop tp3-summary-azure' EXIT
+          curl --fail --retry 10 --retry-all-errors --retry-delay 1 --max-time 2 http://127.0.0.1:8081/healthz
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8081/v1/summary?month=2026-10')
+          test "$status" = 401
+      - name: Export tested image for an authenticated local transfer
+        if: github.event_name == 'workflow_dispatch' && inputs.export_image
+        run: |
+          docker save tp3-summary:test --output summary-image.tar
+          sha256sum summary-image.tar > summary-image.tar.sha256
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' && inputs.export_image
+        with:
+          name: tp3-tested-container
+          path: |
+            backend/summary-image.tar
+            backend/summary-image.tar.sha256
+          compression-level: 6
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tp3-local-synthetic-load
+          path: docs/tp3-v2/evidencias/load-local.json
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.14.3'
+      - run: terraform -chdir=infra/azure fmt -check -recursive
+      - run: terraform -chdir=infra/azure init -backend=false
+      - run: terraform -chdir=infra/azure validate
+      - run: terraform -chdir=infra/azure test
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4
+      - run: sdkmanager --channel=3 "platforms;android-37.0" "build-tools;37.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - run: bash ./gradlew testDebugUnitTest assembleDebug lintDebug --no-daemon

@@ -1,0 +1,31 @@
+{
+  "source": "Azure Container Apps replica list API",
+  "profile": "baseline",
+  "observations": 43,
+  "transitions": [
+    {
+      "atUtc": "2026-11-03T04:10:34.6814858Z",
+      "replicas": 0,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:10:55.4418444Z",
+      "replicas": 1,
+      "ready": 0
+    },
+    {
+      "atUtc": "2026-11-03T04:12:06.2837808Z",
+      "replicas": 2,
+      "ready": 1
+    },
+    {
+      "atUtc": "2026-11-03T04:17:07.6206341Z",
+      "replicas": 0,
+      "ready": 0
+    }
+  ],
+  "observedPeakAssigned": 2.0,
+  "observedPeakReady": 2.0,
+  "sourceFile": "azure-scale-baseline.json",
+  "interpolated": false
+}

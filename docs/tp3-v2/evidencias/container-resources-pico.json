@@ -1,0 +1,106 @@
+{
+  "source": "Read-only Azure Container Apps exec: server Node proc status and replica cgroup cpu.stat",
+  "profile": "pico",
+  "isAzureMonitor": false,
+  "replicasSuccessfullySampled": 1,
+  "requestedSecondReplicaProbeFailed": "Azure exec Conflict/ErrorGeneratingAuthToken; no second-replica data invented",
+  "loadStartedAtUtc": "2026-11-03T05:17:29.320Z",
+  "loadFinishedAtUtc": "2026-11-03T05:20:06.003Z",
+  "samplesInsideLoad": 2,
+  "rssMaxMiBDuringSampledLoad": 170.3984375,
+  "cpuAverageCoresIntervalsInsideLoad": [
+    {
+      "fromUtc": "2026-11-03T05:19:46.632Z",
+      "toUtc": "2026-11-03T05:19:56.655Z",
+      "elapsedSeconds": 10.023,
+      "cpuUsageDeltaUsec": 2639421,
+      "averageCpuCores": 0.2633364262196947
+    }
+  ],
+  "peakIntervalCpuCores": 0.2633364262196947,
+  "memoryScope": "Node server process RSS, not whole-container WorkingSetBytes",
+  "cpuScope": "Replica cgroup including the read-only observer; not all replicas",
+  "sampleProcessMayAddOverhead": true,
+  "interpolated": false,
+  "series": [
+    {
+      "rawFile": "resource-probe-pico-ca-tp3-finanzas-summary--latest-a9f3e6d4-b895-4997-ae4a-c15844c0c74c-051930151.txt",
+      "rawSha256": "2c0bf251bc3cc76dfbba4cce36f9d240a0fbd53b7268f2340b779017fea6fb95",
+      "samples": [
+        {
+          "atUtc": "2026-11-03T05:19:46.632Z",
+          "pid": 5,
+          "name": "node",
+          "rssKiB": 174488,
+          "highWaterRssKiB": 174488,
+          "cgroupCpuUsageUsec": 35063016,
+          "observerPid": 22,
+          "insideLoadWindow": true
+        },
+        {
+          "atUtc": "2026-11-03T05:19:56.655Z",
+          "pid": 5,
+          "name": "node",
+          "rssKiB": 174488,
+          "highWaterRssKiB": 174488,
+          "cgroupCpuUsageUsec": 37702437,
+          "observerPid": 22,
+          "insideLoadWindow": true
+        },
+        {
+          "atUtc": "2026-11-03T05:20:06.665Z",
+          "pid": 5,
+          "name": "node",
+          "rssKiB": 174488,
+          "highWaterRssKiB": 174488,
+          "cgroupCpuUsageUsec": 40182769,
+          "observerPid": 22,
+          "insideLoadWindow": false
+        },
+        {
+          "atUtc": "2026-11-03T05:20:16.676Z",
+          "pid": 5,
+          "name": "node",
+          "rssKiB": 146204,
+          "highWaterRssKiB": 175188,
+          "cgroupCpuUsageUsec": 40350981,
+          "observerPid": 22,
+          "insideLoadWindow": false
+        },
+        {
+          "atUtc": "2026-11-03T05:20:26.684Z",
+          "pid": 5,
+          "name": "node",
+          "rssKiB": 146332,
+          "highWaterRssKiB": 175188,
+          "cgroupCpuUsageUsec": 40367047,
+          "observerPid": 22,
+          "insideLoadWindow": false
+        },
+        {
+          "atUtc": "2026-11-03T05:20:36.695Z",
+          "pid": 5,
+          "name": "node",
+          "rssKiB": 146332,
+          "highWaterRssKiB": 175188,
+          "cgroupCpuUsageUsec": 40371120,
+          "observerPid": 22,
+          "insideLoadWindow": false
+        }
+      ],
+      "cpuIntervalsEntirelyInsideLoad": [
+        {
+          "fromUtc": "2026-11-03T05:19:46.632Z",
+          "toUtc": "2026-11-03T05:19:56.655Z",
+          "elapsedSeconds": 10.023,
+          "cpuUsageDeltaUsec": 2639421,
+          "averageCpuCores": 0.2633364262196947
+        }
+      ]
+    }
+  ],
+  "references": [
+    "https://docs.kernel.org/admin-guide/cgroup-v2.html",
+    "https://docs.kernel.org/filesystems/proc.html"
+  ]
+}

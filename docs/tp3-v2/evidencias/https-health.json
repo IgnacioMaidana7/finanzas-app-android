@@ -1,0 +1,14 @@
+{
+  "observedAtUtc": "2026-11-03T04:03:45.417Z",
+  "serviceOrigin": "https://ca-tp3-finanzas-summary.gentlerock-685a5a8a.chilecentral.azurecontainerapps.io",
+  "httpsCertificateValidation": "Node default certificate validation; no bypass",
+  "healthStatus": 200,
+  "healthBody": {
+    "status": "ok"
+  },
+  "anonymousStatus": 401,
+  "httpStatus": 301,
+  "httpLocation": "https://ca-tp3-finanzas-summary.gentlerock-685a5a8a.chilecentral.azurecontainerapps.io/healthz",
+  "elapsedMs": 2676,
+  "syntheticAccountsCreated": false
+}

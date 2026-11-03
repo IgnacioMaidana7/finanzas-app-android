@@ -1,0 +1,19 @@
+{
+  "verifiedAtUtc": "2026-11-03T05:37:03.5891270Z",
+  "source": "Azure Resource Manager group/resource/budget APIs and Terraform state",
+  "deployment": "second v2 deployment, after media/alta/pico",
+  "userAuthorizedRetirement": true,
+  "terraformDestroyed": 7,
+  "resourceGroupExists": false,
+  "matchingAzureResourcesRemaining": 0,
+  "matchingBudgetRemaining": 0,
+  "terraformManagedResources": 0,
+  "firebaseProjectDeleted": false,
+  "syntheticCleanupConfirmed": true,
+  "profilesCleaned": [
+    "baseline",
+    "media",
+    "alta",
+    "pico"
+  ]
+}

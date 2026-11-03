@@ -204,6 +204,11 @@ fun DashboardScreen(
             onEditInitialBalances = { showInitialBalanceDialog = true }
         )
 
+        // Resumen mensual: backend del TP3, opcional hasta que se apruebe su despliegue.
+        if (com.maidana.finanzasapp.BuildConfig.SUMMARY_BASE_URL.isNotBlank()) {
+            CloudSummaryCard()
+        }
+
         // Tarjetas de Métricas Rápidas
         Row(
             modifier = Modifier.fillMaxWidth(),
