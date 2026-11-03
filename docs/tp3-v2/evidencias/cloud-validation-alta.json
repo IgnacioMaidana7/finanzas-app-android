@@ -1,0 +1,45 @@
+{
+  "environment": "azure-real-synthetic-only",
+  "createdAt": "2026-11-03T05:07:26.313Z",
+  "month": "2026-11",
+  "realFinancialDataAccessed": false,
+  "serviceOrigin": "https://ca-tp3-finanzas-summary.graymushroom-cf292f83.chilecentral.azurecontainerapps.io",
+  "checks": {
+    "health": 200,
+    "unauthenticated": 401,
+    "authenticatedSummary": 200,
+    "otherUserSeesEmptyMonth": true,
+    "uidInjection": 400,
+    "firestoreCrossUser": 403,
+    "tenDocumentCalculation": true,
+    "revokedSession": 401,
+    "freshSession": 200
+  },
+  "cleanup": true,
+  "sourceCommit": "bb566ada9f1b5f076ef48f5e18ae50879f75ad75",
+  "verifierSha256": "b01b8d0e006451265e08b11dd81a75613c019d9a3d0a65b8cefada5d8c892fdb",
+  "firebasePlan": "Spark (user confirmed)",
+  "load": {
+    "profile": "alta",
+    "scheduledRequests": 12000,
+    "completedRequests": 12000,
+    "configuredConcurrency": 128,
+    "observedPeakInFlight": 128,
+    "scheduledRequestsPerSecond": 100,
+    "actualRequestsPerSecond": 99.39,
+    "syntheticDocumentsPerSummary": 1,
+    "errors": 0,
+    "failures": {},
+    "statusCounts": {
+      "200": 12000
+    },
+    "stoppedEarly": false,
+    "percentilePopulation": "all completed requests, including failures",
+    "elapsedMs": 120739,
+    "p50Ms": 816,
+    "p95Ms": 2024,
+    "p99Ms": 3347,
+    "provesAutoscalingByItself": false
+  },
+  "cleanupErrors": 0
+}

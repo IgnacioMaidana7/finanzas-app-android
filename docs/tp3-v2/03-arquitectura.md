@@ -42,10 +42,8 @@ flowchart TB
 
 ## Recorrido y alcance real
 
-Android conserva Firebase Authentication, persistencia Firestore y las integraciones TP7. Para el resumen envía por HTTPS un ID token y mes. Node.js verifica JWT y vigencia de sesión, deriva el UID del token y consulta Firestore REST con ese mismo token bajo Security Rules. No utiliza credenciales administrativas Google en Azure.
+Android envía mes y token Firebase por HTTPS. Node verifica JWT y vigencia, deriva UID del token y consulta Firestore REST bajo Security Rules. DolarAPI/ArgentinaDatos quedan en Android con caché y ML Kit es local.
 
-El ingreso/balanceo y escalado son administrados por Azure Container Apps. La regla HTTP declarada tiene umbral 16 y rango 0-2. Se observó 0 -> 1 -> 2 -> 0, con la segunda réplica posterior a terminar la carga inicial. No se acreditó balanceo por instancia ni mejora de latencia con dos réplicas.
+La linea base pertenece al primer despliegue; los tres niveles siguientes al segundo, con la misma imagen, region, CPU/memoria y limite de replicas. No son cuatro ensayos sobre el mismo entorno fisico. La segunda replica del baseline aparecio despues de terminar su carga, por lo que no se atribuye ese p95 a dos procesos. Las series no se interpolan.
 
-DolarAPI y ArgentinaDatos se consultan desde Android con caché y no recibieron carga masiva. ML Kit procesa OCR local, propone un borrador editable y requiere confirmación para guardar.
-
-No se implementó redundancia zonal/regional ni se amplió a seis réplicas. Las cuotas Firebase no aumentan al escalar Azure. [Resultados reales y límites](07-resultados-cloud.md).
+Recursos retirados y verificados. Retiro verificado en `2026-11-03T05:37:03.5891270Z`. [Resultados y límites](07-resultados-cloud.md).

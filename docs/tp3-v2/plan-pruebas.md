@@ -31,8 +31,13 @@ Registrar por perfil: requests programadas/realizadas, RPS reales, latencia p50/
 
 Además ejecutar pruebas de regresión de Firebase, DolarAPI, ArgentinaDatos, caché y ML Kit a través de mocks/dispositivo: no afirmar que una carga de API demuestra rendimiento de toda la app Android. Documentar pruebas manuales pendientes de OCR y emulador; no declararlas aprobadas sin ejecutarlas.
 
-## Estado
+## Estado medido, 03/11/2026
 
-- Código TP3 recuperado sobre TP7; despliegue Azure v2 y perfil inicial ejecutados el 03/11/2026.
-- Baseline medido: 1.000 consultas sin errores, 24,56 req/s, p95 783 ms; ciclo real 0 -> 1 -> 2 -> 0. Los perfiles media/alta/pico siguen como plan no ejecutado y requieren autorización adicional.
-- La tarjeta de resumen mensual ya se recuperó y las comprobaciones automáticas existentes pasaron. Faltan la prueba real en dispositivo, la integración con Azure v2 y el diagrama e informe final con evidencias reales.
+| Perfil | Completadas / meta | RPS programado / real | Máximo en curso configurado / real | p50 / p95 / p99 ms | Errores |
+|---|---:|---:|---:|---:|---:|
+| baseline | 1000 / 1000 | 25 / 24.56 | 32 / 24 | 749 / 783 / 887 | 0 |
+| media | 5000 / 5000 | 60 / 59.48 | 64 / 64 | 750 / 1115 / 1949 | 0 |
+| alta | 12000 / 12000 | 100 / 99.39 | 128 / 128 | 816 / 2024 / 3347 | 0 |
+| pico | 20000 / 20000 | 160 / 127.64 | 256 / 256 | 1604 / 4853 / 6796 | 0 |
+
+CPU y memoria de Azure Monitor siguen sin valores verificables. El costo final contabilizado aun no esta disponible. La prueba manual Android no esta acreditada: no habia un dispositivo conectado. La carga representa un movimiento por resumen. No se valido redundancia zonal/regional ni se aumento el maximo a seis. La sonda directa cubre solo una replica y una ventana corta del pico; el observador puede agregar sobrecarga. No completa la telemetria de Azure Monitor.

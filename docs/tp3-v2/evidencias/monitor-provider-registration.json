@@ -1,0 +1,9 @@
+{
+  "observedAtUtc": "2026-11-03T04:54:51.2680740Z",
+  "source": "Azure Resource Manager provider registration API",
+  "namespace": "Microsoft.Insights",
+  "before": "NotRegistered",
+  "after": "Registered",
+  "monitoringResourcesCreated": 0,
+  "note": "Registration is a prerequisite check, not proof that metric values are available."
+}

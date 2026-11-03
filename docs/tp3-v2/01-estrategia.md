@@ -1,6 +1,6 @@
 # TP3 renovado — Entregable 1: Estrategia de escalabilidad
 
-**Materia:** Arquitecturas Móviles · **Aplicación:** FinanzasApp Android · **Base funcional:** TP7 · **Estado:** despliegue v2 y perfil inicial medidos; perfiles superiores y telemetría completa pendientes.
+**Materia:** Arquitecturas Móviles · **Aplicación:** FinanzasApp Android · **Base funcional:** TP7 · **Estado:** despliegue v2 y perfiles progresivos medidos; límites de evidencia explícitos.
 
 ## 1. Objetivo y contexto
 
@@ -38,6 +38,6 @@ Métricas: RPS programados y reales, solicitudes simultáneas observadas, latenc
 
 El aumento de instancias sin mejoras en latencia puede señalar cuello de botella en Firebase o en red, no necesariamente en CPU. Evitar presentar el total de solicitudes como sinónimo de simultaneidad. Evaluar caché, consultas agregadas y resúmenes precomputados antes de seguir elevando el número de réplicas.
 
-**Resultado v2 (03/11/2026):** 1.000 consultas cloud, cero errores, p95 783 ms, 24,56 req/s y máximo en curso 24. La API de réplicas registró 0 -> 1 -> 2 -> 0; la segunda apareció después de la carga. No se acredita mejora por dos procesos. Las consultas resumieron un movimiento ficticio para respetar Spark. Perfiles mayores, CPU/memoria y costo final siguen pendientes. Ver [resultados auténticos](07-resultados-cloud.md).
+**Resultados v2:** 38000 consultas completadas, 0 errores, máximo de réplicas observado 2. Los cuatro niveles, fuentes y límites están en [07-resultados-cloud.md](07-resultados-cloud.md). CPU y memoria de Azure Monitor siguen sin valores verificables. El costo final contabilizado aun no esta disponible. La prueba manual Android no esta acreditada: no habia un dispositivo conectado. La carga representa un movimiento por resumen. No se valido redundancia zonal/regional ni se aumento el maximo a seis. La sonda directa cubre solo una replica y una ventana corta del pico; el observador puede agregar sobrecarga. No completa la telemetria de Azure Monitor.
 
-**Referencias:** Guía de TP3 (p. 3), TP7 (p. 10); *Lean Mobile App Development*, capítulo 16; documentación oficial Azure Container Apps https://learn.microsoft.com/azure/container-apps/scale-app; repositorio `docs/tp7/README.md`.
+**Referencias:** Guía de TP3 (p. 3), TP7 (p. 10); Lean Mobile App Development, capítulo 16; [escalado Azure](https://learn.microsoft.com/azure/container-apps/scale-app); repositorio `docs/tp7/README.md`.

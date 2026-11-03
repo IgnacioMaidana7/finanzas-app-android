@@ -1,6 +1,6 @@
 # TP3 v2 | Operación de Azure y captura de evidencias (procedimiento de ejecución)
 
-**ESTADO:** procedimiento reproducible. La ejecución v2 del 03/11/2026 sí se desplegó y midió el perfil inicial; ver [resultados](07-resultados-cloud.md). Las instrucciones por sí solas no son evidencia. La prueba anterior de octubre está retirada.
+**ESTADO:** procedimiento reproducible. La ejecución v2 del 03/11/2026 sí se desplegó y se midieron los perfiles progresivos; ver [resultados](07-resultados-cloud.md). Las instrucciones por sí solas no son evidencia. La prueba anterior de octubre está retirada.
 
 ## Objetivo y requisitos
 
@@ -30,10 +30,6 @@ En la preparación del 02–03/11/2026 se verificaron los proveedores necesarios
 ## Paso 2. Preparación de las variables locales
 
 Copiar `infra/azure/terraform.tfvars.example` a `infra/azure/terraform.tfvars` y completar `subscription_id`, `location`, `registry_name` y `registry_location`. El archivo real está excluido de Git. Mantener `deploy_app=false` hasta disponer de imagen probada.
-
-Antes de planificar un despliegue real, inicializar el backend local con una ruta fuera del repositorio y de OneDrive, por ejemplo `terraform -chdir=infra/azure init -backend-config="path=C:/ruta-privada/tp3-v2/terraform.tfstate"`. `init -backend=false` sirve solo para validación sin estado. No confiar en `-state` del plan para elegir la ruta del posterior apply; usar el backend explícito y comprobarla.
-
-Antes de planificar un despliegue real, inicializar el backend local con una ruta fuera del repositorio y de OneDrive, por ejemplo `terraform -chdir=infra/azure init -backend-config="path=C:/ruta-privada/tp3-v2/terraform.tfstate"`. `init -backend=false` sirve solo para validación sin estado. No confiar en `-state` del plan para elegir la ruta del posterior apply; usar el backend explícito y comprobarla.
 
 Antes de planificar un despliegue real, inicializar el backend local con una ruta fuera del repositorio y de OneDrive, por ejemplo `terraform -chdir=infra/azure init -backend-config="path=C:/ruta-privada/tp3-v2/terraform.tfstate"`. `init -backend=false` sirve solo para validación sin estado. No confiar en `-state` del plan para elegir la ruta del posterior apply; usar el backend explícito y comprobarla.
 
@@ -80,10 +76,10 @@ Los archivos `azure-scale-<perfil>.json` deben conservar series de tiempo realme
 
 | Perfil | Total programado | Operaciones en curso máximas configuradas | Tasa programada | Resultado |
 |---|---:|---:|---:|---|
-| baseline | 1.000 | 32 | 25/s | PENDIENTE |
-| media | 5.000 | 64 | 60/s | PENDIENTE |
-| alta | 12.000 | 128 | 100/s | PENDIENTE |
-| pico | 20.000 | 256 | 160/s | PENDIENTE |
+| baseline | 1.000 | 32 | 25/s | Ejecutado; ver resultados originales |
+| media | 5.000 | 64 | 60/s | Ejecutado; ver resultados originales |
+| alta | 12.000 | 128 | 100/s | Ejecutado; ver resultados originales |
+| pico | 20.000 | 256 | 160/s | Ejecutado; ver resultados originales |
 
 La prueba debe informar **RPS efectivos** y concurrencia **real observada**, no asumir que los límites configurados se alcanzaron. Registrar p50, p95, p99, fallos 4xx/5xx, CPU, memoria, réplicas listas y asignadas, lecturas a Firestore, tiempos de arranque y costo aproximado/real si está visible.
 
@@ -101,3 +97,7 @@ Luego de respaldar evidencias, dejar los recursos activos o retirarlos **solo se
 - Métricas Azure: https://learn.microsoft.com/es-es/azure/container-apps/metrics
 - Facturación Azure: https://learn.microsoft.com/es-es/azure/container-apps/billing
 - Firebase REST: https://firebase.google.com/docs/firestore/use-rest-api
+
+## Registro de Monitor comprobado
+
+Antes de medir, comprobar `az provider show -n Microsoft.Insights --query registrationState`. En esta continuación estaba NotRegistered y se registró mediante `az provider register -n Microsoft.Insights --wait`. Registrar un proveedor no garantiza datos: conservar consultas y distinguir Azure Monitor de sondas directas del contenedor. No crear almacenamiento/Log Analytics de pago sin revisar alcance y costo.

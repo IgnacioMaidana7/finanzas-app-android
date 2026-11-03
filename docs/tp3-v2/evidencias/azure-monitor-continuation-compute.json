@@ -1,0 +1,153 @@
+{
+  "interval": "PT1M",
+  "timespan": "2026-11-03T04:55:00Z/2026-11-03T05:23:14Z",
+  "value": [
+    {
+      "name": {
+        "localizedValue": "CPU Usage",
+        "value": "UsageNanoCores"
+      },
+      "timeseries": [],
+      "unit": "NanoCores"
+    },
+    {
+      "name": {
+        "localizedValue": "Memory Working Set Bytes",
+        "value": "WorkingSetBytes"
+      },
+      "timeseries": [],
+      "unit": "Bytes"
+    },
+    {
+      "displayDescription": "Number of replicas count of container app",
+      "errorCode": "Success",
+      "id": "/subscriptions/07998e31-8ff8-4e92-941e-cc5de7868bfd/resourceGroups/rg-tp3-finanzas/providers/Microsoft.App/containerapps/ca-tp3-finanzas-summary/providers/Microsoft.Insights/metrics/Replicas",
+      "name": {
+        "localizedValue": "Replica Count",
+        "value": "Replicas"
+      },
+      "resourceGroup": "rg-tp3-finanzas",
+      "timeseries": [
+        {
+          "data": [
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T04:55:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T04:56:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T04:57:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T04:58:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T04:59:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:00:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:01:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:02:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:03:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:04:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:05:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:06:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:07:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:08:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:09:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:10:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:11:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:12:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:13:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:14:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:15:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:16:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:17:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:18:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:19:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:20:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:21:00Z"
+            },
+            {
+              "maximum": 0.0,
+              "timeStamp": "2026-11-03T05:22:00Z"
+            }
+          ],
+          "metadatavalues": []
+        }
+      ],
+      "type": "Microsoft.Insights/metrics",
+      "unit": "Count"
+    }
+  ]
+}

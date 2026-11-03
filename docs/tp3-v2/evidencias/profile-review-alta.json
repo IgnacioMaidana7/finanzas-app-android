@@ -1,0 +1,27 @@
+{
+  "reviewedAtUtc": "2026-11-03T05:17:14.1255003Z",
+  "profile": "alta",
+  "evidenceSha256": "eb6f3890f99112806c0bd506972ed4307ed53fbdcf3983decfe0d82142e92e7a",
+  "verifierStartedAtUtc": "2026-11-03T05:07:26.313Z",
+  "evidenceFinishedWriteAtUtc": "2026-11-03T05:09:43.6826071Z",
+  "includesFunctionalSetupAndCleanup": true,
+  "completedRequests": 12000,
+  "errors": 0,
+  "effectiveRps": 99.39,
+  "observedPeakInFlight": 128,
+  "p50Ms": 816,
+  "p95Ms": 2024,
+  "p99Ms": 3347,
+  "cleanupConfirmed": true,
+  "peakAssignedReplicas": 2.0,
+  "peakReadyReplicas": 2.0,
+  "lastObservedReplicas": 0,
+  "budgetVisibleSpend": {
+    "amount": 0.0,
+    "unit": "USD"
+  },
+  "budgetDataIsFinalBill": false,
+  "resourceLimitStillTwo": true,
+  "checksPassed": true,
+  "automaticAdvancePerformed": false
+}

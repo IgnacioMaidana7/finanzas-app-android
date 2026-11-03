@@ -1,58 +1,42 @@
-# Entregable 2 - Configuración cloud y evidencias reales
+# Entregable 2 - Configuración cloud con evidencia real
 
-**Ejecución v2: 03/11/2026. Recursos retirados y verificados.** Esto documenta un despliegue que existió y fue probado; no un servicio permanente ni el cierre completo de todos los ensayos previstos.
+**Recursos retirados y verificados.** Se ejecutaron los perfiles de carga con aprobación y revisión individual; sus datos originales, límites y fuentes están en [07-resultados-cloud.md](07-resultados-cloud.md).
 
-## Configuración aplicada
-
-| Elemento | Valor observado |
+| Elemento | Configuración aplicada |
 |---|---|
-| Grupo | rg-tp3-finanzas |
-| Entorno | cae-tp3-finanzas, Chile Central; interfaz Express/Rápido |
+| Grupo / región | rg-tp3-finanzas / Chile Central |
+| Entorno | cae-tp3-finanzas, interfaz Express/Rápido |
 | Aplicación | ca-tp3-finanzas-summary |
-| Registro | tp3finanzasv2im20261102, Basic, Brazil South; administración por claves deshabilitada |
-| Identidad | id-tp3-summary; AcrPull sobre ese registro |
-| Recursos por réplica | 0,25 vCPU / 0,5 GiB |
-| Ingreso | HTTPS obligatorio, puerto interno 8080, sonda /healthz |
-| Escala | Mínimo 0 y máximo 2, regla http-demand / 16; interfaz mostró 300 s y 30 s |
-| Presupuesto | USD 5 mensuales, filtro de grupo, alertas 50/80/100 % al Propietario; no es corte duro |
+| Registro | tp3finanzasv2im20261102, Basic, Brazil South, admin deshabilitado |
+| Identidad | id-tp3-summary; AcrPull restringido al ACR |
+| Backend | Node.js 22, 0,25 vCPU / 0,5 GiB por réplica, puerto 8080 |
+| Ingreso | HTTPS obligatorio, /healthz, sin token 401 |
+| Escala | Mínimo 0, máximo 2; regla HTTP 16; no se aumentó a seis |
+| Presupuesto | USD 5/mes, alertas 50/80/100 %, no corte duro |
 
-Backend de la imagen: `8e5aeedfac0d35527e2c9bfb2d38a19123a14d30`. Verificador del ensayo: `66562605b5810fb78c3bcf1cb102d9622ca79a05` y hash en JSON. Digest desplegado:
+No se instalaron credenciales administrativas Google en Azure. La API verifica JWT y estado de sesión y consulta Firestore REST con el token del usuario bajo Security Rules. Terraform se aplicó en dos fases y conserva estado fuera de OneDrive/Git.
 
-`sha256:b4e785288de3580f721699fde89e6692f0726e1a694f511c006458c8b121ecbd`
+La aplicación conserva Firebase Auth/Firestore, DolarAPI, ArgentinaDatos y ML Kit del TP7. La carga apunta exclusivamente al resumen del backend propio y usa un movimiento ficticio por consulta para respetar Spark. La comprobación funcional usa diez (ingresos 500, gastos 150, neto 350). No hubo carga masiva a DolarAPI ni ArgentinaDatos.
 
-El contenedor actual se exportó en [41574591148](https://github.com/IgnacioMaidana7/finanzas-app-android/actions/runs/41574591148), se verificaron los hashes ZIP/TAR y se transfirió al ACR. La compilación no se presenta como medición cloud. No se usó la imagen histórica del 22/10.
+La imagen de backend es idéntica en todas las mediciones: commit `8e5aeedfac0d35527e2c9bfb2d38a19123a14d30`, digest `sha256:b4e785288de3580f721699fde89e6692f0726e1a694f511c006458c8b121ecbd`. Baseline se midió en el primer despliegue; media/alta/pico en un segundo despliegue con la misma región, recursos por réplica, límites y datos. No se afirma que los cuatro compartieran el mismo entorno físico. El verificador del pico agrega marcas UTC de inicio/fin para correlacionar las sondas; no cambia la carga programada ni el backend.
 
-Origen durante la prueba: `https://ca-tp3-finanzas-summary.gentlerock-685a5a8a.chilecentral.azurecontainerapps.io`.
+## Resultados
 
-## Evidencia cloud
+| Perfil | Completadas / meta | RPS programado / real | Máximo en curso configurado / real | p50 / p95 / p99 ms | Errores |
+|---|---:|---:|---:|---:|---:|
+| baseline | 1000 / 1000 | 25 / 24.56 | 32 / 24 | 749 / 783 / 887 | 0 |
+| media | 5000 / 5000 | 60 / 59.48 | 64 / 64 | 750 / 1115 / 1949 | 0 |
+| alta | 12000 / 12000 | 100 / 99.39 | 128 / 128 | 816 / 2024 / 3347 | 0 |
+| pico | 20000 / 20000 | 160 / 127.64 | 256 / 256 | 1604 / 4853 / 6796 | 0 |
 
-| Control | Resultado |
-|---|---|
-| HTTPS /healthz | 200, validación TLS normal |
-| Sin token | 401 |
-| HTTP | 301 a HTTPS; nunca se enviaron tokens por HTTP |
-| Resumen de diez movimientos | 500 ingresos, 150 gastos, 350 neto; 200 |
-| Otro usuario | Mes vacío; acceso cruzado Firestore 403 |
-| UID por parámetro | 400 |
-| Sesión revocada / nueva | 401 / 200 |
-| Limpieza | Dos cuentas y fixtures ficticios eliminados; cero errores reportados |
-| Carga baseline | 1.000 completadas, cero errores, 24,56 req/s, máximo en curso 24, p50/p95/p99 749/783/887 ms |
-| Escalado | 43 observaciones, 0 -> 1 -> 2 -> 0; máximo listo 2 |
+Autenticación, aislamiento, revocación y limpieza se acreditan por perfil. Las series de réplicas, consultas originales de Monitor, registro del proveedor y sondas directas se conservan separados. No se rellenan huecos ni se confunden fuentes de CPU/memoria.
 
-**Tamaño de carga:** un movimiento por resumen después de la prueba funcional de diez. Firebase Spark tiene 50.000 lecturas/día compartidas; los cuatro perfiles completos requerirían unas 38.000 más controles. No se habilitó Blaze.
+## Cierre y pendientes
 
-## Límites y pendientes
+Terraform retiro los siete recursos autorizados del segundo despliegue; verificacion Azure a las 2026-11-03T05:37:03.5891270Z. Se confirmaron grupo ausente, cero recursos propios y presupuesto propio ausente. Tambien se conserva el retiro del primer despliegue. Firebase habitual se mantiene; los fixtures sinteticos se limpiaron por perfil.
 
-- Media (5.000/64/60), alta (12.000/128/100) y pico (20.000/256/160): **no ejecutados; autorización adicional pendiente**. No hay resultados inventados.
-- La segunda réplica apareció a las 04:12:06 UTC. El verificador ya había guardado el resultado y limpieza a las 04:11:41 UTC. El ensayo prueba reacción de escala, pero no rendimiento sostenido de dos réplicas ni balanceo por instancia.
-- Azure Monitor devolvió CPU/memoria sin valores y réplicas/solicitudes en cero, también en el portal. No se usaron esos ceros para negar los datos directos ni se rellenaron muestras.
-- No se aumentó el máximo a seis. La cuota regional de entornos se verificó; la API de cuotas del entorno devolvió lista vacía y no acredita seis réplicas.
-- Primera respuesta desde cero: 3.956 ms, incluida red/TLS/arranque; no tiempo puro de inicio del proceso.
-- Costo visible de presupuesto USD 0 antes del retiro: **no es costo final facturado**. Se conservaron las tarifas y evidencias locales; hay demora de contabilización.
-- Sin dispositivo Android conectado: prueba manual de OCR y tarjeta no acreditada en esta ejecución.
+CPU y memoria de Azure Monitor siguen sin valores verificables. El costo final contabilizado aun no esta disponible. La prueba manual Android no esta acreditada: no habia un dispositivo conectado. La carga representa un movimiento por resumen. No se valido redundancia zonal/regional ni se aumento el maximo a seis. La sonda directa cubre solo una replica y una ventana corta del pico; el observador puede agregar sobrecarga. No completa la telemetria de Azure Monitor.
 
-## Retiro y fuentes
+Las cuatro cargas autorizadas se revisaron individualmente. La evidencia directa de CPU/RSS, cuando existe, pertenece a contadores del contenedor/proceso y no se presenta como Azure Monitor. El costo final contabilizado y la prueba manual Android permanecen pendientes; no había dispositivo conectado. La observabilidad de plataforma se informa tal como fue devuelta. No se declara cerrado un punto sin evidencia.
 
-Retiro autorizado por el usuario; estado: **retirados y verificados**, verificación UTC: 2026-11-03T04:31:04.5955416Z. Firebase habitual se conserva. Ver [resultados y archivos](07-resultados-cloud.md).
-
-Las evidencias técnicas están en `evidencias/`. Capturas de cuenta/crédito, estado y planes completos quedan fuera de este repositorio público. El informe PDF local incluye las capturas originales disponibles y explicita los pendientes. **No se declara cerrado todo el TP3 por haber pasado un perfil.**
+El informe PDF y las capturas completas se entregan localmente. Los planes, estado y datos de cuenta no se publican en este repositorio público. El PR sigue borrador mientras existan puntos no acreditados.
