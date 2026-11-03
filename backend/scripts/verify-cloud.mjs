@@ -131,6 +131,7 @@ try {
   if (profileName !== 'baseline' && process.env.TP3_APPROVE_HIGH_LOAD !== '1') {
     throw new Error('The selected cloud load profile needs explicit additional approval');
   }
+  const loadStartedAtUtc = new Date().toISOString();
   const started = performance.now();
   const latencies = [];
   let next = 0, errors = 0, inFlight = 0, peakInFlight = 0, stoppedEarly = false, consecutiveErrors = 0;
@@ -169,11 +170,13 @@ try {
       }
     }
   }));
+  const loadFinishedAtUtc = new Date().toISOString();
   latencies.sort((x, y) => x - y);
   const percentile = p => latencies.length ? Math.round(latencies[Math.max(0, Math.ceil(latencies.length * p) - 1)]) : null;
   const elapsedMs = Math.round(performance.now() - started);
   evidence.load = {
-    profile: profileName, scheduledRequests: profile.requests,
+    profile: profileName, startedAtUtc: loadStartedAtUtc, finishedAtUtc: loadFinishedAtUtc,
+    scheduledRequests: profile.requests,
     completedRequests: latencies.length, configuredConcurrency: profile.concurrency,
     observedPeakInFlight: peakInFlight, scheduledRequestsPerSecond: profile.rateRps,
     actualRequestsPerSecond: elapsedMs ? Number((latencies.length / (elapsedMs / 1000)).toFixed(2)) : null,
