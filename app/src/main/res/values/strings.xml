@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FinanzasApp</string>
+    <string name="notification_channel_id" translatable="false">retention_reminders</string>
+    <string name="notification_channel_name">Recordatorios</string>
+    <string name="notification_channel_description">Avisos para revisar movimientos y metas de ahorro</string>
+    <string name="notification_settings">Configurar notificaciones</string>
 </resources>
