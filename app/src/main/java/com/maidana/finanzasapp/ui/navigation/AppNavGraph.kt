@@ -1,11 +1,14 @@
 package com.maidana.finanzasapp.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maidana.finanzasapp.ui.screens.auth.LoginScreen
@@ -32,7 +35,10 @@ import com.maidana.finanzasapp.ui.screens.categories.CategoryViewModel
 fun AppNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = viewModel(),
+    notificationDestination: String? = null,
+    onNotificationOpened: () -> Unit = {},
+    onNotificationSettings: () -> Unit = {}
 ) {
     val transactionsViewModel: TransactionsViewModel = viewModel()
     val budgetsViewModel: BudgetsViewModel = viewModel()
@@ -44,6 +50,18 @@ fun AppNavGraph(
         Screen.Dashboard.route
     } else {
         Screen.Login.route
+    }
+
+    val entry by navController.currentBackStackEntryAsState()
+    val currentRoute = entry?.destination?.route
+    LaunchedEffect(notificationDestination, currentRoute) {
+        val destination = notificationDestination ?: return@LaunchedEffect
+        if (currentRoute == null || currentRoute == Screen.Login.route ||
+            currentRoute == Screen.Register.route || !authViewModel.isUserAuthenticated()
+        ) return@LaunchedEffect
+
+        navController.navigate(destination) { launchSingleTop = true }
+        onNotificationOpened()
     }
 
     NavHost(
@@ -84,6 +102,7 @@ fun AppNavGraph(
         composable(route = Screen.Dashboard.route) {
             DashboardScreen(
                 accountViewModel = accountViewModel,
+                onNotificationSettings = onNotificationSettings,
                 onNavigateToNewTransaction = {
                     navController.navigate(Screen.NewTransaction.route)
                 },

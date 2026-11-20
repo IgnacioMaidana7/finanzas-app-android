@@ -18,7 +18,10 @@ import com.maidana.finanzasapp.ui.navigation.NavigationItem
 
 @Composable
 fun FinanzasApp(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    notificationDestination: String? = null,
+    onNotificationOpened: () -> Unit = {},
+    onNotificationSettings: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -64,6 +67,9 @@ fun FinanzasApp(
     ) { innerPadding ->
         AppNavGraph(
             navController = navController,
+            notificationDestination = notificationDestination,
+            onNotificationOpened = onNotificationOpened,
+            onNotificationSettings = onNotificationSettings,
             modifier = Modifier.padding(innerPadding)
         )
     }
